@@ -120,10 +120,22 @@ class AnalysisState(Frozen):
     reused_from: str | None = None
 
 
+JobKind = Literal["analyze", "report", "compare"]
+
+
+class Job(Frozen):
+    """Work for the orchestrator: a full analysis, a new report, or a comparison."""
+
+    kind: JobKind
+    analysis_id: AnalysisId
+    other_id: AnalysisId | None = None
+
+
 class JobRef(Frozen):
     """Handle of the background job that processes an analysis."""
 
     backend: Literal["local", "modal"]
+    kind: JobKind = "analyze"
     call_id: str | None = None
     dispatched_at: datetime = Field(default_factory=utcnow)
 
