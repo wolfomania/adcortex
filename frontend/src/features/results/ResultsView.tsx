@@ -2,10 +2,11 @@
 // the report, and the details. Every view follows the same playhead.
 import { useMemo } from 'react'
 
-import type { Analysis, AnalysisResult, MediaKind, MediaSource, StoredReport } from '@/api/types'
+import type { Analysis, AnalysisResult, MediaSource, StoredReport } from '@/api/types'
 import { BrainPanel } from '@/features/brain/BrainPanel'
 import { formatDateTime, formatDuration } from '@/lib/format'
 
+import { KIND_LABELS } from './describe'
 import { ExportMenu } from './ExportMenu'
 import { MediaPlayer } from './MediaPlayer'
 import { Playback, PlaybackContext } from './playback'
@@ -15,12 +16,6 @@ import { ScoreCards } from './ScoreCards'
 import { SystemsPanel } from './SystemsPanel'
 import { SystemTimeline } from './SystemTimeline'
 import { Transcript } from './Transcript'
-
-const KIND_LABELS: Record<MediaKind, string> = {
-  video: 'Video',
-  audio: 'Audio',
-  text: 'Script',
-}
 
 export interface ResultsViewProps {
   analysis: Analysis
@@ -64,7 +59,7 @@ export function ResultsView({
           </div>
           <div className="flex flex-wrap gap-2 print:hidden">
             {actions}
-            <ExportMenu data={{ analysis, result, report }} />
+            <ExportMenu data={{ analysis, result, report, source }} />
           </div>
         </header>
 

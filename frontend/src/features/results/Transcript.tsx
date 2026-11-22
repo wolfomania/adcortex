@@ -2,19 +2,8 @@
 import type { LanguageInfo, Word } from '@/api/types'
 import { cn } from '@/lib/utils'
 
+import { languageNote } from './describe'
 import { usePlayback, usePlaybackTime } from './playback'
-
-function languageNote(language: LanguageInfo): string | null {
-  const code = language.detected ?? language.requested
-  if (!code || code === 'auto') {
-    return null
-  }
-  const name = new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code
-  const how = language.detected ? 'detected' : 'as requested'
-  return language.full_support === false
-    ? `${name} (${how}). TRIBE v2 was trained on English speech, so text responses are less reliable.`
-    : `${name} (${how}).`
-}
 
 export function Transcript({
   words,

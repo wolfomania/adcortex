@@ -13,9 +13,9 @@ export function slugify(text: string, fallback = 'analysis'): string {
   return slug || fallback
 }
 
-/** Saves `data` as pretty-printed JSON under `filename`. */
-export function downloadJson(filename: string, data: unknown): void {
-  const blob = new Blob([`${JSON.stringify(data, null, 2)}\n`], { type: 'application/json' })
+/** Saves `contents` as a file named `filename`. */
+export function downloadFile(filename: string, contents: string, type: string): void {
+  const blob = new Blob([contents], { type })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -25,4 +25,9 @@ export function downloadJson(filename: string, data: unknown): void {
   link.remove()
   // Some browsers start the download after the click returns.
   setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+/** Saves `data` as pretty-printed JSON under `filename`. */
+export function downloadJson(filename: string, data: unknown): void {
+  downloadFile(filename, `${JSON.stringify(data, null, 2)}\n`, 'application/json')
 }

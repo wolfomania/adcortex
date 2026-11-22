@@ -8,6 +8,7 @@ import { formatClock, formatZ } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 import { usePlayback, usePlaybackTime } from './playback'
+import { zReference } from './describe'
 import { heatFill, timeAtX, timeTicks } from './timeline'
 
 /** Room for each time label on the axis. */
@@ -123,7 +124,7 @@ export function SystemTimeline({
         <p className="text-xs text-muted-foreground" aria-live="polite">
           {hover && hovered
             ? `${formatClock(hover.t)} · ${hovered.label}: ${hoveredZ === null || hoveredZ === undefined ? 'not applicable' : formatZ(hoveredZ)}`
-            : `z-scores against ${result.baseline ? 'the reference library' : "this clip's own average"}, one column per second`}
+            : `z-scores against ${zReference(result)}, one column per second`}
         </p>
       </div>
       <div className="grid grid-cols-[6.75rem_1fr] gap-x-3 sm:grid-cols-[9rem_1fr]">

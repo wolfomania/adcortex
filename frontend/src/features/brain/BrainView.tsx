@@ -24,6 +24,7 @@ import type { Playback } from '@/features/results/playback'
 import { HEMISPHERE_VERTICES, HEMISPHERES, type BrainAssets, type Surface } from './assets'
 import { buildBase, buildLut, paintFrame, type FrameSet } from './paint'
 import { readPalette } from './palette'
+import { setBrainCanvas } from './snapshot'
 
 extend({ OrbitControls })
 
@@ -210,6 +211,16 @@ function Controls({ view, scene }: { view: BrainViewName; scene: Scene }) {
   )
 }
 
+/** Lends the canvas to the report export while the view is on screen. */
+function RegisterCanvas() {
+  const canvas = useThree((state) => state.gl.domElement)
+  useEffect(() => {
+    setBrainCanvas(canvas)
+    return () => setBrainCanvas(null)
+  }, [canvas])
+  return null
+}
+
 function HeadLight() {
   const light = useRef<DirectionalLight>(null)
   useFrame(({ camera }) => {
@@ -285,6 +296,7 @@ export default function BrainView(props: BrainViewProps) {
     >
       <ambientLight intensity={0.9} />
       <HeadLight />
+      <RegisterCanvas />
       <Cortex {...props} />
     </Canvas>
   )
