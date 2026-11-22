@@ -27,6 +27,17 @@ function order(systems: readonly SystemSeries[]): SystemSeries[] {
   )
 }
 
+/** Where the system's mean falls among the reference ads and the user's own analyses. */
+function Ranks({ system }: { system: SystemSeries }) {
+  const ranks = [
+    system.percentile == null ? null : `${formatPercentile(system.percentile)} vs reference`,
+    system.library_percentile == null
+      ? null
+      : `${formatPercentile(system.library_percentile)} vs your library`,
+  ].filter((rank) => rank !== null)
+  return ranks.length ? <span>{ranks.join(' · ')}</span> : null
+}
+
 export function SystemsPanel({ systems }: { systems: readonly SystemSeries[] }) {
   return (
     <section aria-labelledby="systems-title" className="flex flex-col gap-3">
@@ -52,12 +63,7 @@ export function SystemsPanel({ systems }: { systems: readonly SystemSeries[] }) 
                     <Badge variant="outline" title={CONFIDENCE_HINTS[system.confidence]}>
                       {CONFIDENCE_LABELS[system.confidence]}
                     </Badge>
-                    {applicable ? (
-                      <span>
-                        {formatPercentile(system.percentile)} vs reference ·{' '}
-                        {formatPercentile(system.library_percentile)} vs your library
-                      </span>
-                    ) : null}
+                    {applicable ? <Ranks system={system} /> : null}
                   </div>
                 </summary>
                 {info ? (

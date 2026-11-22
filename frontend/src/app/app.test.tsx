@@ -181,8 +181,12 @@ describe('the app', () => {
     const radio = renderApp(`/a/${idOf('Lumen radio spot')}`)
     expect(await screen.findByRole('heading', { name: 'The audio' })).toBeVisible()
     expect(screen.getByText(/Writing the report failed/)).toBeVisible()
-    // The radio fixture was measured without a reference library.
+    // The radio fixture was measured without a reference library, so the
+    // z-scores compare the clip with itself and there are no reference ranks.
     expect(screen.getByText(/No reference library is installed/)).toBeVisible()
+    expect(screen.getByText("Above this clip's average")).toBeVisible()
+    expect(screen.getByText(/against this clip's own average/)).toBeVisible()
+    expect(screen.queryByText(/vs reference/)).toBeNull()
     radio.unmount()
 
     const script = renderApp(`/a/${idOf('Lumen script: draft 2')}`)

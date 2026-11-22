@@ -5,7 +5,7 @@ MODAL := $(UV) modal
 DEPLOY := deploy/modal_app.py
 ENV_FLAG := $(if $(wildcard .env),--env-file .env,)
 
-.PHONY: help install dev dev-api dev-web test lint prefetch deploy stop logs
+.PHONY: help install dev dev-api dev-web dev-ui test lint prefetch deploy stop logs
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-9s %s\n", $$1, $$2}'
@@ -21,6 +21,9 @@ dev-api:
 	$(UV) $(ENV_FLAG) uvicorn --factory neuromarketing.api.app:create_app --reload --reload-dir backend/src --port 8000
 
 dev-web:
+	pnpm --dir frontend dev:backend
+
+dev-ui: ## Run the app alone on :5173, with a mock API in the browser
 	pnpm --dir frontend dev
 
 test: ## Run the backend and frontend tests

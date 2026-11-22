@@ -175,7 +175,10 @@ export function BrainPanel({ result, source }: { result: AnalysisResult; source:
         <div className="flex items-center gap-2" aria-hidden>
           <span>Below</span>
           <span className="h-2 flex-1 rounded-full bg-gradient-to-r from-viz-neg via-viz-mid to-viz-pos" />
-          <span>Above the reference average</span>
+          {/* Without a reference library, the backend compares each vertex with the clip itself. */}
+          <span>
+            {result.baseline ? 'Above the reference average' : "Above this clip's average"}
+          </span>
         </div>
         {assets.data && frameSet ? (
           <p className="min-h-4" aria-live="polite">
