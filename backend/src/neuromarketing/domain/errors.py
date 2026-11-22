@@ -37,3 +37,23 @@ class PipelineError(UserFacingError):
 
 class MediaError(InvalidInputError):
     """The uploaded file cannot be read or is outside the allowed limits."""
+
+
+class UnauthorizedError(UserFacingError):
+    """No session, a wrong password, or an invalid share link."""
+
+    status_code = 401
+
+
+class PayloadTooLargeError(UserFacingError):
+    status_code = 413
+
+
+class RateLimitedError(UserFacingError):
+    status_code = 429
+
+
+class UnavailableError(UserFacingError):
+    """A dependency is not configured or not reachable, e.g. the report model."""
+
+    status_code = 503
