@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
+    "e2e": "playwright test",
     "size": "node scripts/check-size.mjs",
     "gen:api": "cd ../backend && uv run python scripts/export_api_schema.py ../frontend/src/api/schema.json && cd ../frontend && node scripts/gen-api-types.mjs",
     "gen:catalog": "node scripts/gen-catalog.mjs",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@tanstack/router-plugin": "^1.169.0",
     "@testing-library/dom": "^10.4.2",

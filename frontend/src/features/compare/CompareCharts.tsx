@@ -191,7 +191,8 @@ function levelLabel(named: Named): string {
 
 export function SystemComparison({ a, b }: { a: Named; b: Named }) {
   return (
-    <section aria-labelledby="systems-compare-title" className="flex flex-col gap-3">
+    // min-w-0 lets the table scroll inside its frame instead of widening the page.
+    <section aria-labelledby="systems-compare-title" className="flex min-w-0 flex-col gap-3">
       <h2 id="systems-compare-title" className="text-sm font-medium">
         Brain systems
       </h2>
