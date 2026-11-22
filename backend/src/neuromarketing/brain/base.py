@@ -18,13 +18,18 @@ BrainInputKind = Literal["video", "audio"]
 
 @dataclass(frozen=True)
 class BrainRequest:
-    """One prediction job. `media` is a video (MP4) or a WAV file."""
+    """One prediction job. `media` is a video (MP4) or a WAV file.
+
+    `script` is the original text of a script analysis; the synthetic
+    backends use it as their transcript.
+    """
 
     media: Path
     kind: BrainInputKind
     duration_s: float
     language: str = "auto"
     seed: int = 0
+    script: str | None = None
 
 
 @dataclass(frozen=True)

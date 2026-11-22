@@ -24,8 +24,14 @@ class Settings(BaseSettings):
     runtime: Literal["local", "modal"] = "local"
     data_dir: Path = Path(".nm-data")
     frontend_dist: Path | None = None
-    brain: BrainBackend = "mock"
+    brain_backend: BrainBackend = "mock"
     replay_fixture: Path | None = None
+
+    # GPU worker only (NM_BRAIN_BACKEND=tribe).
+    tribe_checkpoint: str = "facebook/tribev2"
+    whisperx_python: str = "/opt/whisperx/bin/python"
+    whisper_model: str = "large-v3"
+    models_dir: Path | None = None
 
     min_duration_s: float = Field(default=3.0, gt=0)
     max_duration_s: float = Field(default=180.0, gt=0)

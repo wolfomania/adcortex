@@ -87,5 +87,5 @@ packages = ["neuromarketing"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["tribev2.*", "neuralset.*", "pandas.*", "torch.*"]
+module = ["tribev2.*", "neuralset.*", "pandas.*", "torch.*", "whisperx.*", "faster_whisper.*"]
 ignore_missing_imports = true

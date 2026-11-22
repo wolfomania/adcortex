@@ -7,6 +7,10 @@ class NeuroError(Exception):
     """Base class for all errors raised by this package."""
 
 
+class ConfigurationError(NeuroError):
+    """The app is configured inconsistently; raised at start-up."""
+
+
 class UserFacingError(NeuroError):
     """An error whose message is written for the person using the app."""
 
