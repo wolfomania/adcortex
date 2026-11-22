@@ -1,0 +1,1561 @@
+{
+  "$defs": {
+    "Analysis": {
+      "description": "Everything the API returns about one analysis, except large artifacts.",
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/AnalysisMeta"
+        },
+        "progress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Progress"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "state": {
+          "$ref": "#/$defs/AnalysisState"
+        }
+      },
+      "required": [
+        "meta",
+        "state"
+      ],
+      "title": "Analysis",
+      "type": "object"
+    },
+    "AnalysisDetail": {
+      "properties": {
+        "analysis": {
+          "$ref": "#/$defs/Analysis"
+        },
+        "report": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoredReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set when a report exists."
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalysisResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set once completed."
+        }
+      },
+      "required": [
+        "analysis"
+      ],
+      "title": "AnalysisDetail",
+      "type": "object"
+    },
+    "AnalysisMeta": {
+      "description": "User-facing facts about an analysis. Written only by the web tier.",
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^\\d{8}-\\d{6}-[0-9a-f]{6}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/MediaKind"
+        },
+        "language": {
+          "default": "auto",
+          "title": "Language",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceFile"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "created_at",
+        "source"
+      ],
+      "title": "AnalysisMeta",
+      "type": "object"
+    },
+    "AnalysisResult": {
+      "properties": {
+        "baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaselineRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "duration_s": {
+          "title": "Duration S",
+          "type": "number"
+        },
+        "envelope": {
+          "default": [],
+          "items": {
+            "type": "number"
+          },
+          "title": "Envelope",
+          "type": "array"
+        },
+        "envelope_hz": {
+          "default": 10.0,
+          "title": "Envelope Hz",
+          "type": "number"
+        },
+        "frames": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BrainFrames"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "language": {
+          "$ref": "#/$defs/LanguageInfo"
+        },
+        "moments": {
+          "items": {
+            "$ref": "#/$defs/Moment"
+          },
+          "title": "Moments",
+          "type": "array"
+        },
+        "scene_stats": {
+          "items": {
+            "$ref": "#/$defs/SceneStat"
+          },
+          "title": "Scene Stats",
+          "type": "array"
+        },
+        "scenes": {
+          "items": {
+            "$ref": "#/$defs/Scene"
+          },
+          "title": "Scenes",
+          "type": "array"
+        },
+        "scores": {
+          "$ref": "#/$defs/Scores"
+        },
+        "strip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Strip"
+        },
+        "strip_columns": {
+          "default": 10,
+          "title": "Strip Columns",
+          "type": "integer"
+        },
+        "systems": {
+          "items": {
+            "$ref": "#/$defs/SystemSeries"
+          },
+          "title": "Systems",
+          "type": "array"
+        },
+        "times": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Times",
+          "type": "array"
+        },
+        "transcript": {
+          "items": {
+            "$ref": "#/$defs/Word"
+          },
+          "title": "Transcript",
+          "type": "array"
+        },
+        "version": {
+          "const": 2,
+          "default": 2,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "duration_s",
+        "times",
+        "systems",
+        "scenes",
+        "scene_stats",
+        "moments",
+        "scores",
+        "transcript",
+        "language"
+      ],
+      "title": "AnalysisResult",
+      "type": "object"
+    },
+    "AnalysisState": {
+      "description": "Pipeline-owned state. Written only by the pipeline.",
+      "properties": {
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LanguageInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LlmInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "media": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MediaInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "reused_from": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reused From"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalysisSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timings": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Timings",
+          "type": "object"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "AnalysisState",
+      "type": "object"
+    },
+    "AnalysisSummary": {
+      "description": "Small digest shown on history cards.",
+      "properties": {
+        "duration_s": {
+          "title": "Duration S",
+          "type": "number"
+        },
+        "headline": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Headline"
+        },
+        "response_index": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Response Index"
+        },
+        "system_means": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "System Means",
+          "type": "object"
+        },
+        "top_systems": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Top Systems",
+          "type": "array"
+        }
+      },
+      "required": [
+        "duration_s"
+      ],
+      "title": "AnalysisSummary",
+      "type": "object"
+    },
+    "ApiError": {
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_input",
+            "payload_too_large",
+            "unauthorized",
+            "not_found",
+            "conflict",
+            "rate_limited",
+            "unavailable",
+            "internal"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Plain-language message for the person.",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ApiError",
+      "type": "object"
+    },
+    "AppConfig": {
+      "description": "Public: the UI reads it before login.",
+      "properties": {
+        "authenticated": {
+          "title": "Authenticated",
+          "type": "boolean"
+        },
+        "brain_backend": {
+          "description": "\"mock\" and \"replay\" produce demo data; show a banner.",
+          "enum": [
+            "mock",
+            "replay",
+            "tribe"
+          ],
+          "title": "Brain Backend",
+          "type": "string"
+        },
+        "languages": {
+          "items": {
+            "$ref": "#/$defs/LanguageOption"
+          },
+          "title": "Languages",
+          "type": "array"
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "llm": {
+          "$ref": "#/$defs/LlmSettings"
+        },
+        "password_required": {
+          "title": "Password Required",
+          "type": "boolean"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "password_required",
+        "authenticated",
+        "brain_backend",
+        "llm",
+        "limits",
+        "languages"
+      ],
+      "title": "AppConfig",
+      "type": "object"
+    },
+    "BaselineRef": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "n_clips": {
+          "title": "N Clips",
+          "type": "integer"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "n_clips",
+        "description"
+      ],
+      "title": "BaselineRef",
+      "type": "object"
+    },
+    "BrainFrames": {
+      "description": "Per-second cortical maps, quantized to 8-bit for the 3D viewer.",
+      "properties": {
+        "file": {
+          "default": "frames.bin",
+          "title": "File",
+          "type": "string"
+        },
+        "n_frames": {
+          "title": "N Frames",
+          "type": "integer"
+        },
+        "n_vertices": {
+          "title": "N Vertices",
+          "type": "integer"
+        },
+        "vmax": {
+          "title": "Vmax",
+          "type": "number"
+        },
+        "vmin": {
+          "title": "Vmin",
+          "type": "number"
+        }
+      },
+      "required": [
+        "n_frames",
+        "n_vertices",
+        "vmin",
+        "vmax"
+      ],
+      "title": "BrainFrames",
+      "type": "object"
+    },
+    "CompareRequest": {
+      "properties": {
+        "a_id": {
+          "pattern": "^\\d{8}-\\d{6}-[0-9a-f]{6}$",
+          "title": "A Id",
+          "type": "string"
+        },
+        "b_id": {
+          "pattern": "^\\d{8}-\\d{6}-[0-9a-f]{6}$",
+          "title": "B Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "a_id",
+        "b_id"
+      ],
+      "title": "CompareRequest",
+      "type": "object"
+    },
+    "ComparisonReport": {
+      "properties": {
+        "a_strengths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "A Strengths",
+          "type": "array"
+        },
+        "b_strengths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "B Strengths",
+          "type": "array"
+        },
+        "headline": {
+          "description": "One-sentence comparison, at most 20 words.",
+          "title": "Headline",
+          "type": "string"
+        },
+        "recommendation": {
+          "description": "Which elements to keep from each.",
+          "title": "Recommendation",
+          "type": "string"
+        },
+        "summary": {
+          "description": "3-5 sentences comparing A and B.",
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "headline",
+        "summary",
+        "a_strengths",
+        "b_strengths",
+        "recommendation"
+      ],
+      "title": "ComparisonReport",
+      "type": "object"
+    },
+    "ComparisonState": {
+      "properties": {
+        "comparison": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoredComparison"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "status": {
+          "enum": [
+            "none",
+            "running",
+            "completed",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "ComparisonState",
+      "type": "object"
+    },
+    "Health": {
+      "properties": {
+        "status": {
+          "const": "ok",
+          "default": "ok",
+          "title": "Status",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "Health",
+      "type": "object"
+    },
+    "KeyMoment": {
+      "properties": {
+        "brain_response": {
+          "description": "Which brain systems respond and how, citing the metrics.",
+          "title": "Brain Response",
+          "type": "string"
+        },
+        "t": {
+          "description": "Time in seconds from the start of the media.",
+          "title": "T",
+          "type": "number"
+        },
+        "title": {
+          "description": "Short label, at most 8 words.",
+          "title": "Title",
+          "type": "string"
+        },
+        "what_happens": {
+          "description": "What the viewer sees or hears at t.",
+          "title": "What Happens",
+          "type": "string"
+        },
+        "why_it_matters": {
+          "description": "Implication for the creative.",
+          "title": "Why It Matters",
+          "type": "string"
+        }
+      },
+      "required": [
+        "t",
+        "title",
+        "what_happens",
+        "brain_response",
+        "why_it_matters"
+      ],
+      "title": "KeyMoment",
+      "type": "object"
+    },
+    "LanguageInfo": {
+      "properties": {
+        "detected": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detected"
+        },
+        "full_support": {
+          "default": true,
+          "title": "Full Support",
+          "type": "boolean"
+        },
+        "requested": {
+          "default": "auto",
+          "title": "Requested",
+          "type": "string"
+        }
+      },
+      "title": "LanguageInfo",
+      "type": "object"
+    },
+    "LanguageOption": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "full_support": {
+          "description": "False: predictions carry a lower-reliability caveat.",
+          "title": "Full Support",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "name",
+        "full_support"
+      ],
+      "title": "LanguageOption",
+      "type": "object"
+    },
+    "Limits": {
+      "properties": {
+        "max_duration_s": {
+          "title": "Max Duration S",
+          "type": "number"
+        },
+        "max_script_chars": {
+          "title": "Max Script Chars",
+          "type": "integer"
+        },
+        "max_upload_mb": {
+          "title": "Max Upload Mb",
+          "type": "integer"
+        },
+        "min_duration_s": {
+          "title": "Min Duration S",
+          "type": "number"
+        },
+        "min_script_chars": {
+          "title": "Min Script Chars",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "min_duration_s",
+        "max_duration_s",
+        "max_upload_mb",
+        "min_script_chars",
+        "max_script_chars"
+      ],
+      "title": "Limits",
+      "type": "object"
+    },
+    "LlmInfo": {
+      "properties": {
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "input_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "video",
+                "audio",
+                "keyframes",
+                "text"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Mode"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "status": {
+          "default": "skipped",
+          "enum": [
+            "ok",
+            "skipped",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "title": "LlmInfo",
+      "type": "object"
+    },
+    "LlmSettings": {
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "LlmSettings",
+      "type": "object"
+    },
+    "LoginRequest": {
+      "properties": {
+        "password": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "password"
+      ],
+      "title": "LoginRequest",
+      "type": "object"
+    },
+    "MediaInfo": {
+      "properties": {
+        "audio_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio Codec"
+        },
+        "duration_s": {
+          "exclusiveMinimum": 0,
+          "title": "Duration S",
+          "type": "number"
+        },
+        "format_name": {
+          "default": "",
+          "title": "Format Name",
+          "type": "string"
+        },
+        "fps": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fps"
+        },
+        "has_audio": {
+          "title": "Has Audio",
+          "type": "boolean"
+        },
+        "has_video": {
+          "title": "Has Video",
+          "type": "boolean"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Height"
+        },
+        "video_codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Video Codec"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Width"
+        }
+      },
+      "required": [
+        "duration_s",
+        "has_video",
+        "has_audio"
+      ],
+      "title": "MediaInfo",
+      "type": "object"
+    },
+    "MediaKind": {
+      "enum": [
+        "video",
+        "audio",
+        "text"
+      ],
+      "title": "MediaKind",
+      "type": "string"
+    },
+    "Moment": {
+      "properties": {
+        "kind": {
+          "enum": [
+            "peak",
+            "dip"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "system_id": {
+          "title": "System Id",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "title": "T",
+          "type": "number"
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "t",
+        "kind",
+        "system_id",
+        "z",
+        "label"
+      ],
+      "title": "Moment",
+      "type": "object"
+    },
+    "PageMeta": {
+      "properties": {
+        "next_before": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Pass as ?before= for the next page; null on the last.",
+          "title": "Next Before"
+        }
+      },
+      "title": "PageMeta",
+      "type": "object"
+    },
+    "Progress": {
+      "description": "Live progress, updated far more often than the stored state.",
+      "properties": {
+        "fraction": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Fraction",
+          "type": "number"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "Progress",
+      "type": "object"
+    },
+    "Recommendation": {
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "t": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Time in seconds the advice refers to, if any.",
+          "title": "T"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "detail"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    },
+    "RenameRequest": {
+      "properties": {
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "RenameRequest",
+      "type": "object"
+    },
+    "Report": {
+      "properties": {
+        "headline": {
+          "description": "One-sentence verdict, at most 20 words.",
+          "title": "Headline",
+          "type": "string"
+        },
+        "key_moments": {
+          "items": {
+            "$ref": "#/$defs/KeyMoment"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Key Moments",
+          "type": "array"
+        },
+        "recommendations": {
+          "items": {
+            "$ref": "#/$defs/Recommendation"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Recommendations",
+          "type": "array"
+        },
+        "risks": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Risks",
+          "type": "array"
+        },
+        "scene_notes": {
+          "items": {
+            "$ref": "#/$defs/SceneNote"
+          },
+          "title": "Scene Notes",
+          "type": "array"
+        },
+        "strengths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Strengths",
+          "type": "array"
+        },
+        "summary": {
+          "description": "Executive summary, 3-5 sentences.",
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "headline",
+        "summary",
+        "key_moments",
+        "strengths",
+        "risks",
+        "recommendations"
+      ],
+      "title": "Report",
+      "type": "object"
+    },
+    "Scene": {
+      "properties": {
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "number"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "keyframe": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Keyframe"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "index",
+        "start",
+        "end"
+      ],
+      "title": "Scene",
+      "type": "object"
+    },
+    "SceneNote": {
+      "properties": {
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "scene_index": {
+          "description": "Index of the scene in the scene list.",
+          "title": "Scene Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scene_index",
+        "note"
+      ],
+      "title": "SceneNote",
+      "type": "object"
+    },
+    "SceneStat": {
+      "properties": {
+        "mean_z": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Mean Z",
+          "type": "object"
+        },
+        "scene_index": {
+          "title": "Scene Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scene_index",
+        "mean_z"
+      ],
+      "title": "SceneStat",
+      "type": "object"
+    },
+    "Scores": {
+      "description": "Deterministic headline numbers. Percentiles are 0-100.",
+      "properties": {
+        "hook": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Hook"
+        },
+        "peak_count": {
+          "title": "Peak Count",
+          "type": "integer"
+        },
+        "response_index": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Response Index"
+        },
+        "sustain": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sustain"
+        }
+      },
+      "required": [
+        "response_index",
+        "hook",
+        "sustain",
+        "peak_count"
+      ],
+      "title": "Scores",
+      "type": "object"
+    },
+    "SessionInfo": {
+      "properties": {
+        "authenticated": {
+          "title": "Authenticated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "authenticated"
+      ],
+      "title": "SessionInfo",
+      "type": "object"
+    },
+    "ShareLink": {
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "path": {
+          "description": "App path of the read-only view, \"/s/<token>\".",
+          "title": "Path",
+          "type": "string"
+        },
+        "token": {
+          "title": "Token",
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "path",
+        "expires_at"
+      ],
+      "title": "ShareLink",
+      "type": "object"
+    },
+    "SourceFile": {
+      "properties": {
+        "extension": {
+          "title": "Extension",
+          "type": "string"
+        },
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "extension",
+        "size_bytes",
+        "sha256"
+      ],
+      "title": "SourceFile",
+      "type": "object"
+    },
+    "Status": {
+      "enum": [
+        "queued",
+        "preparing",
+        "waiting_for_gpu",
+        "predicting",
+        "analyzing",
+        "interpreting",
+        "completed",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "StoredComparison": {
+      "properties": {
+        "a_id": {
+          "title": "A Id",
+          "type": "string"
+        },
+        "b_id": {
+          "title": "B Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/$defs/ComparisonReport"
+        }
+      },
+      "required": [
+        "a_id",
+        "b_id",
+        "model",
+        "report"
+      ],
+      "title": "StoredComparison",
+      "type": "object"
+    },
+    "StoredReport": {
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "input_mode": {
+          "enum": [
+            "video",
+            "audio",
+            "keyframes",
+            "text"
+          ],
+          "title": "Input Mode",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "report": {
+          "$ref": "#/$defs/Report"
+        }
+      },
+      "required": [
+        "model",
+        "input_mode",
+        "report"
+      ],
+      "title": "StoredReport",
+      "type": "object"
+    },
+    "SystemSeries": {
+      "description": "One brain system's response over time, as baseline z-scores (1 Hz).",
+      "properties": {
+        "applicable": {
+          "default": true,
+          "title": "Applicable",
+          "type": "boolean"
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "title": "Confidence",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "library_percentile": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Library Percentile"
+        },
+        "mean_z": {
+          "title": "Mean Z",
+          "type": "number"
+        },
+        "percentile": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Percentile"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "confidence",
+        "values",
+        "mean_z"
+      ],
+      "title": "SystemSeries",
+      "type": "object"
+    },
+    "WarmupState": {
+      "properties": {
+        "warming": {
+          "description": "True when this call started or found a GPU warm-up.",
+          "title": "Warming",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "warming"
+      ],
+      "title": "WarmupState",
+      "type": "object"
+    },
+    "Word": {
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "number"
+        },
+        "start": {
+          "title": "Start",
+          "type": "number"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "start",
+        "end"
+      ],
+      "title": "Word",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

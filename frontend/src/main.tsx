@@ -1,10 +1,26 @@
+import '@fontsource-variable/geist'
+import '@fontsource-variable/geist-mono'
+import './styles/index.css'
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
+import { createAppRouter } from './router'
+
+const queryClient = new QueryClient()
+const router = createAppRouter(queryClient)
+
+const container = document.getElementById('root')
+if (!container) {
+  throw new Error('Missing #root element')
+}
+
+createRoot(container).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </StrictMode>,
 )

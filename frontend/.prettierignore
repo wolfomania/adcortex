@@ -1,0 +1,8 @@
+dist
+coverage
+pnpm-lock.yaml
+src/routeTree.gen.ts
+src/api/schema.json
+src/api/schema.ts
+src/features/systems/catalog.json
+public/brain
