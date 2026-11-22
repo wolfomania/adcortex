@@ -8,6 +8,7 @@ import {
   referenceNote,
   sceneHighlights,
   scoreCards,
+  systemLevel,
   zReference,
 } from '@/features/results/describe'
 import { heatFill, timeTicks } from '@/features/results/timeline'
@@ -179,17 +180,18 @@ function timeline(result: AnalysisResult): string {
 }
 
 function systemsTable(result: AnalysisResult): string {
+  const hasBaseline = result.baseline != null
   const rows = result.systems.map((system) => {
     const applicable = system.applicable !== false
     return `<tr${applicable ? '' : ' class="note"'}><th scope="row">${e(system.label)}</th><td class="num">${
-      applicable ? e(formatZ(system.mean_z)) : 'needs a picture'
+      applicable ? e(formatZ(systemLevel(system, hasBaseline).z)) : 'needs a picture'
     }</td><td class="num">${e(formatPercentile(system.percentile))}</td><td class="num">${e(
       formatPercentile(system.library_percentile),
     )}</td><td>${e(CONFIDENCE_LABELS[system.confidence])}</td></tr>`
   })
   return section(
     'Brain systems',
-    `<table><thead><tr><th scope="col">System</th><th scope="col" class="num">Mean</th><th scope="col" class="num">vs reference</th><th scope="col" class="num">vs your library</th><th scope="col">Confidence</th></tr></thead><tbody>${rows.join('')}</tbody></table>`,
+    `<table><thead><tr><th scope="col">System</th><th scope="col" class="num">${hasBaseline ? 'Mean' : 'Strongest second'}</th><th scope="col" class="num">vs reference</th><th scope="col" class="num">vs your library</th><th scope="col">Confidence</th></tr></thead><tbody>${rows.join('')}</tbody></table>`,
   )
 }
 

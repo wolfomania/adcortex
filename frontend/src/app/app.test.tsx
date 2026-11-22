@@ -207,6 +207,9 @@ describe('the app', () => {
     expect(screen.getByText("Above this clip's average")).toBeVisible()
     expect(screen.getByText(/against this clip's own average/)).toBeVisible()
     expect(screen.queryByText(/vs reference/)).toBeNull()
+    // Each system's mean is then zero by construction, so its peak stands in.
+    expect(screen.getByText(/shows each system's strongest second/)).toBeVisible()
+    expect(screen.getAllByText(/^peak [+−±]\d/).length).toBeGreaterThan(0)
     radio.unmount()
 
     const script = renderApp(`/a/${idOf('Lumen script: draft 2')}`)

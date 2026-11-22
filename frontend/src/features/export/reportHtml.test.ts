@@ -112,8 +112,10 @@ describe('renderReportHtml', () => {
     ).body.textContent
 
     expect(withBaseline).toContain('z-scores against the reference library')
+    expect(withBaseline).toContain('Mean')
     expect(withoutBaseline).toContain("z-scores against this clip's own average")
     expect(withoutBaseline).toContain('No reference library is installed')
+    expect(withoutBaseline).toContain('Strongest second')
   })
 
   it('says when there is no written report', () => {

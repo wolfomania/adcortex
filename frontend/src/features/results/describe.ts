@@ -1,6 +1,6 @@
 // Words for the numbers of an analysis, shared by the results page and the
 // exported report, so both say the same thing.
-import type { AnalysisResult, LanguageInfo, MediaKind } from '@/api/types'
+import type { AnalysisResult, LanguageInfo, MediaKind, SystemSeries } from '@/api/types'
 import { formatZ } from '@/lib/format'
 
 export const KIND_LABELS: Record<MediaKind, string> = {
@@ -61,6 +61,39 @@ export function referenceNote(result: AnalysisResult): string {
  */
 export function zReference(result: AnalysisResult): string {
   return result.baseline ? 'the reference library' : "this clip's own average"
+}
+
+export interface SystemLevel {
+  /** The z-score that sums the system up. */
+  z: number
+  /** The mean over the clip, or the strongest second. */
+  kind: 'mean' | 'peak'
+}
+
+export const LEVEL_LABELS: Record<SystemLevel['kind'], string> = {
+  mean: 'mean response',
+  peak: 'strongest second',
+}
+
+/** The z-score that fills a system's bar: peaks run higher than means. */
+export const FULL_BAR_Z: Record<SystemLevel['kind'], number> = { mean: 2, peak: 4 }
+
+/**
+ * The number that sums up a system. Against a reference library it is the
+ * mean response. Without one, each system is compared with the clip's own
+ * average, so every mean is zero; the strongest second says more.
+ */
+export function systemLevel(system: SystemSeries, hasBaseline: boolean): SystemLevel {
+  if (hasBaseline) {
+    return { z: system.mean_z, kind: 'mean' }
+  }
+  const values = system.values.filter((value): value is number => value !== null)
+  return { z: values.length ? Math.max(...values) : 0, kind: 'peak' }
+}
+
+/** A system's level as text: `+1.2 SD` for a mean, `peak +2.8 SD` for a peak. */
+export function formatLevel(level: SystemLevel): string {
+  return level.kind === 'peak' ? `peak ${formatZ(level.z)}` : formatZ(level.z)
 }
 
 /** The spoken language, and a caveat when TRIBE v2 handles it less well. */

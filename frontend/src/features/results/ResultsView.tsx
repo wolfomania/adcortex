@@ -92,7 +92,7 @@ export function ResultsView({
             onRewrite={onRewrite}
             rewriting={rewriting}
           />
-          <SystemsPanel systems={result.systems} />
+          <SystemsPanel systems={result.systems} hasBaseline={result.baseline != null} />
         </div>
 
         {isVideo && result.scenes.length > 1 ? (

@@ -3,6 +3,7 @@ import { curveMonotoneX, line } from 'd3-shape'
 import { useMemo } from 'react'
 
 import type { AnalysisResult, SystemSeries } from '@/api/types'
+import { FULL_BAR_Z, LEVEL_LABELS, systemLevel } from '@/features/results/describe'
 import { meanCurve, timeTicks } from '@/features/results/timeline'
 import { formatClock, formatZ } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -154,14 +155,19 @@ export function ResponseChart({ a, b }: { a: Named; b: Named }) {
   )
 }
 
-const BAR_Z = 2
+interface BarProps {
+  system: SystemSeries | undefined
+  side: 'a' | 'b'
+  hasBaseline: boolean
+}
 
-function Bar({ system, side }: { system: SystemSeries | undefined; side: 'a' | 'b' }) {
+function Bar({ system, side, hasBaseline }: BarProps) {
   if (!system || system.applicable === false) {
     return <span className="text-xs text-muted-foreground">n/a</span>
   }
-  const width = Math.min(Math.abs(system.mean_z) / BAR_Z, 1) * 50
-  const positive = system.mean_z >= 0
+  const level = systemLevel(system, hasBaseline)
+  const width = Math.min(Math.abs(level.z) / FULL_BAR_Z[level.kind], 1) * 50
+  const positive = level.z >= 0
   return (
     <span className="flex items-center gap-2">
       <span className="relative h-2 flex-1 rounded-full bg-muted" aria-hidden>
@@ -173,11 +179,14 @@ function Bar({ system, side }: { system: SystemSeries | undefined; side: 'a' | '
           }
         />
       </span>
-      <span className="w-16 text-right font-mono text-xs tabular-nums">
-        {formatZ(system.mean_z)}
-      </span>
+      <span className="w-16 text-right font-mono text-xs tabular-nums">{formatZ(level.z)}</span>
     </span>
   )
+}
+
+/** What a side's bars show: the mean response, or the strongest second without a reference library. */
+function levelLabel(named: Named): string {
+  return LEVEL_LABELS[named.result.baseline ? 'mean' : 'peak']
 }
 
 export function SystemComparison({ a, b }: { a: Named; b: Named }) {
@@ -196,13 +205,13 @@ export function SystemComparison({ a, b }: { a: Named; b: Named }) {
               <th scope="col" className="px-4 py-2 text-left font-medium">
                 <span className="inline-flex items-center gap-1.5">
                   <Swatch side="a" />
-                  A, mean response
+                  A, {levelLabel(a)}
                 </span>
               </th>
               <th scope="col" className="px-4 py-2 text-left font-medium">
                 <span className="inline-flex items-center gap-1.5">
                   <Swatch side="b" />
-                  B, mean response
+                  B, {levelLabel(b)}
                 </span>
               </th>
             </tr>
@@ -214,10 +223,10 @@ export function SystemComparison({ a, b }: { a: Named; b: Named }) {
                   {pair.label}
                 </th>
                 <td className="w-2/5 px-4 py-2">
-                  <Bar system={pair.a} side="a" />
+                  <Bar system={pair.a} side="a" hasBaseline={a.result.baseline != null} />
                 </td>
                 <td className="w-2/5 px-4 py-2">
-                  <Bar system={pair.b} side="b" />
+                  <Bar system={pair.b} side="b" hasBaseline={b.result.baseline != null} />
                 </td>
               </tr>
             ))}

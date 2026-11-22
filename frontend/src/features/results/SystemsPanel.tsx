@@ -1,14 +1,15 @@
-// The ten brain systems: average response, percentiles, and what each one is.
+// The ten brain systems: response level, percentiles, and what each one is.
 import type { SystemSeries } from '@/api/types'
 import { Badge } from '@/components/ui/badge'
 import { CONFIDENCE_HINTS, CONFIDENCE_LABELS, systemInfo } from '@/features/systems/catalog'
-import { formatPercentile, formatZ } from '@/lib/format'
+import { formatPercentile } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-const BAR_Z = 2
+import { formatLevel, FULL_BAR_Z, systemLevel, type SystemLevel } from './describe'
 
-function MeanBar({ z }: { z: number }) {
-  const width = Math.min(Math.abs(z) / BAR_Z, 1) * 50
+function LevelBar({ level }: { level: SystemLevel }) {
+  const { z } = level
+  const width = Math.min(Math.abs(z) / FULL_BAR_Z[level.kind], 1) * 50
   return (
     <div className="relative h-1.5 w-full rounded-full bg-muted" aria-hidden>
       <div className="absolute inset-y-0 left-1/2 w-px bg-viz-axis" />
@@ -20,10 +21,11 @@ function MeanBar({ z }: { z: number }) {
   )
 }
 
-function order(systems: readonly SystemSeries[]): SystemSeries[] {
+function order(systems: readonly SystemSeries[], hasBaseline: boolean): SystemSeries[] {
+  const level = (system: SystemSeries) => systemLevel(system, hasBaseline).z
   return [...systems].sort(
     (a, b) =>
-      Number(b.applicable !== false) - Number(a.applicable !== false) || b.mean_z - a.mean_z,
+      Number(b.applicable !== false) - Number(a.applicable !== false) || level(b) - level(a),
   )
 }
 
@@ -38,16 +40,31 @@ function Ranks({ system }: { system: SystemSeries }) {
   return ranks.length ? <span>{ranks.join(' · ')}</span> : null
 }
 
-export function SystemsPanel({ systems }: { systems: readonly SystemSeries[] }) {
+export function SystemsPanel({
+  systems,
+  hasBaseline,
+}: {
+  systems: readonly SystemSeries[]
+  hasBaseline: boolean
+}) {
   return (
     <section aria-labelledby="systems-title" className="flex flex-col gap-3">
-      <h2 id="systems-title" className="text-sm font-medium">
-        Brain systems
-      </h2>
+      <div className="flex flex-col gap-1">
+        <h2 id="systems-title" className="text-sm font-medium">
+          Brain systems
+        </h2>
+        {hasBaseline ? null : (
+          <p className="text-xs text-muted-foreground">
+            Without a reference library, each system is measured against its own average, so the
+            list shows each system's strongest second.
+          </p>
+        )}
+      </div>
       <ul className="flex flex-col divide-y rounded-lg border bg-card">
-        {order(systems).map((system) => {
+        {order(systems, hasBaseline).map((system) => {
           const info = systemInfo(system.id)
           const applicable = system.applicable !== false
+          const level = systemLevel(system, hasBaseline)
           return (
             <li key={system.id} className={cn('px-4 py-3', !applicable && 'opacity-60')}>
               <details className="group">
@@ -55,10 +72,10 @@ export function SystemsPanel({ systems }: { systems: readonly SystemSeries[] }) 
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium">{system.label}</span>
                     <span className="font-mono text-xs tabular-nums">
-                      {applicable ? formatZ(system.mean_z) : 'needs a picture'}
+                      {applicable ? formatLevel(level) : 'needs a picture'}
                     </span>
                   </div>
-                  {applicable ? <MeanBar z={system.mean_z} /> : null}
+                  {applicable ? <LevelBar level={level} /> : null}
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <Badge variant="outline" title={CONFIDENCE_HINTS[system.confidence]}>
                       {CONFIDENCE_LABELS[system.confidence]}
