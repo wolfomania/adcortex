@@ -63,7 +63,7 @@ from neuromarketing.storage.repository import (
     keyframe_name,
     source_name,
 )
-from tests.llm_fakes import replying, report_args, user_parts
+from tests.llm_fakes import comparison_args, replying, report_args, user_parts
 
 pytestmark = pytest.mark.ffmpeg
 
@@ -690,16 +690,6 @@ def test_a_report_rewrite_for_a_deleted_analysis_never_calls_the_model(
 # ── comparisons ────────────────────────────────────────────────────────────
 
 
-def _comparison_args(_: int) -> dict[str, Any]:
-    return {
-        "headline": "B hooks faster.",
-        "summary": "B opens on a face.",
-        "a_strengths": ["Clear product shot"],
-        "b_strengths": ["Faster hook"],
-        "recommendation": "Open with B's face, close with A's product.",
-    }
-
-
 def _two_analyses(services: Services, media_dir: Path) -> tuple[str, str]:
     a = _upload(services, media_dir / "tone.wav", MediaKind.AUDIO)
     b = _upload(services, media_dir / "tone.m4a", MediaKind.AUDIO)
@@ -710,9 +700,7 @@ def _two_analyses(services: Services, media_dir: Path) -> tuple[str, str]:
 
 def test_comparisons_are_stored(services: Services, media_dir: Path) -> None:
     a, b = _two_analyses(services, media_dir)
-    services = replace(
-        services, llm=_llm(replying(_comparison_args), services.settings)
-    )
+    services = replace(services, llm=_llm(replying(comparison_args), services.settings))
 
     run_job(services, Job(kind="compare", analysis_id=a, other_id=b))
 
@@ -747,9 +735,7 @@ def test_comparisons_of_deleted_analyses_fail(
 ) -> None:
     a, b = _two_analyses(services, media_dir)
     services.repo.delete(b)
-    services = replace(
-        services, llm=_llm(replying(_comparison_args), services.settings)
-    )
+    services = replace(services, llm=_llm(replying(comparison_args), services.settings))
 
     run_job(services, Job(kind="compare", analysis_id=a, other_id=b))
 

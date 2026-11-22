@@ -23,6 +23,15 @@ def test_new_id_is_sortable_and_valid() -> None:
     assert is_analysis_id(earlier)
 
 
+def test_ids_from_the_same_second_sort_by_millisecond() -> None:
+    first = new_analysis_id(datetime(2026, 1, 1, 12, 0, 0, 9_000, tzinfo=UTC))
+    second = new_analysis_id(datetime(2026, 1, 1, 12, 0, 0, 10_000, tzinfo=UTC))
+    last = new_analysis_id(datetime(2026, 1, 1, 12, 0, 0, 999_999, tzinfo=UTC))
+
+    assert first < second < last
+    assert all(is_analysis_id(i) for i in (first, second, last))
+
+
 @pytest.mark.parametrize(
     "value", ["", "../etc/passwd", "20260101-120000-ABCDEF", "20260101-120000-a1b2c3/x"]
 )

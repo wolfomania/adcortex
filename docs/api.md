@@ -56,11 +56,14 @@ address return `429`.
 | DELETE | `/api/analyses/{id}` | | `null`; cancels a running job |
 | POST | `/api/analyses/{id}/retry` | | `Analysis` (202); only when `failed` |
 | POST | `/api/analyses/{id}/report` | | `Analysis` (202); regenerates the report of a `completed` analysis |
-| POST | `/api/analyses/{id}/share` | | `ShareLink` |
+| POST | `/api/analyses/{id}/share` | | `ShareLink`; only when `completed` |
 | POST | `/api/warmup` | | `WarmupState`; starts the GPU worker ahead of an upload |
 
 `limit` is 1–100 (default 30). History items carry `progress: null`; poll
-`/status` for live progress.
+`/status` for live progress. `AnalysisDetail.result` is set once the metrics
+are ready, which is already while the report is being written
+(`interpreting`). Actions that do not fit the current status (retrying a
+running analysis, sharing an unfinished one) return `409 conflict`.
 
 ### Upload form (`POST /api/analyses`)
 

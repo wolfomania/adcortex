@@ -13,8 +13,13 @@ _ID_RE = re.compile(ANALYSIS_ID_PATTERN)
 
 
 def new_analysis_id(now: datetime | None = None) -> str:
+    """`YYYYMMDD-HHMMSS-mmmrrr`: the milliseconds in hex, then 12 random bits.
+
+    The milliseconds keep uploads made within one second in order.
+    """
     moment = (now or datetime.now(UTC)).astimezone(UTC)
-    return f"{moment:%Y%m%d-%H%M%S}-{secrets.token_hex(3)}"
+    millis = moment.microsecond // 1000
+    return f"{moment:%Y%m%d-%H%M%S}-{millis:03x}{secrets.token_hex(2)[:3]}"
 
 
 def is_analysis_id(value: str) -> bool:

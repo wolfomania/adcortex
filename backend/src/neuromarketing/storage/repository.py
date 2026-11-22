@@ -129,6 +129,9 @@ class AnalysisRepository:
     def save_job(self, analysis_id: str, job: JobRef) -> None:
         self._write(self._doc(analysis_id, JOB), job)
 
+    def clear_job(self, analysis_id: str) -> None:
+        self.store.remove(self._doc(analysis_id, JOB))
+
     def get_result(self, analysis_id: str) -> AnalysisResult:
         return self._read(
             analysis_id, RESULT, AnalysisResult, "The results are not ready yet."

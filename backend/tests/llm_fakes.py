@@ -37,6 +37,16 @@ def report_args(t: float = 5.0, scene_index: int = 0) -> dict[str, Any]:
     }
 
 
+def comparison_args(_: int = 0) -> dict[str, Any]:
+    return {
+        "headline": "B hooks faster.",
+        "summary": "B opens on a face.",
+        "a_strengths": ["Clear product shot"],
+        "b_strengths": ["Faster hook"],
+        "recommendation": "Open with B's face, close with A's product.",
+    }
+
+
 def replying(
     args: Callable[[int], dict[str, Any]], seen: list[list[ModelMessage]] | None = None
 ) -> Callable[[list[ModelMessage], AgentInfo], ModelResponse]:

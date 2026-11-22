@@ -109,7 +109,9 @@ class Health(BaseModel):
 class AnalysisDetail(BaseModel):
     analysis: Analysis
     result: AnalysisResult | None = Field(
-        default=None, description="Set once completed."
+        default=None,
+        description="Set once the metrics are ready: while the report is being "
+        "written (`interpreting`) and once `completed`.",
     )
     report: StoredReport | None = Field(
         default=None, description="Set when a report exists."
