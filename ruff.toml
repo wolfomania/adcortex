@@ -1,0 +1,2 @@
+# Lint the deploy and scripts folders with the backend's rules.
+extend = "backend/pyproject.toml"

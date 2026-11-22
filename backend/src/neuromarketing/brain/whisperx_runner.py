@@ -51,6 +51,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
+def parse_prefetch_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="whisperx_runner.py prefetch",
+        description="Download the Whisper model and alignment models ahead of jobs.",
+    )
+    parser.add_argument("--model", default="large-v3")
+    parser.add_argument("--model-dir", type=Path, required=True)
+    parser.add_argument(
+        "--languages",
+        type=lambda text: [code.strip() for code in text.split(",") if code.strip()],
+        default=["en"],
+        help="comma-separated ISO 639-1 codes",
+    )
+    return parser.parse_args(argv)
+
+
 def align_model_for(language: str) -> str | None:
     """Alignment model override; None lets WhisperX pick its default."""
     return EN_ALIGN_MODEL if language == "en" else None
@@ -205,5 +221,29 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - GPU only
     return 0
 
 
+def prefetch(argv: list[str]) -> int:  # pragma: no cover - WhisperX env only
+    """Load each model once on the CPU, which downloads it into `--model-dir`."""
+    args = parse_prefetch_args(argv)
+    logging.basicConfig(
+        level=logging.INFO, stream=sys.stderr, format="%(levelname)s %(message)s"
+    )
+    import whisperx
+
+    model_dir = str(args.model_dir)
+    whisperx.load_model(args.model, "cpu", compute_type="int8", download_root=model_dir)
+    log.info("Whisper %s ready", args.model)
+    for language in args.languages:
+        whisperx.load_align_model(
+            language_code=language,
+            device="cpu",
+            model_name=align_model_for(language),
+            model_dir=model_dir,
+        )
+        log.info("Alignment model ready for %s", language)
+    return 0
+
+
 if __name__ == "__main__":  # pragma: no cover
+    if sys.argv[1:2] == ["prefetch"]:
+        raise SystemExit(prefetch(sys.argv[2:]))
     raise SystemExit(main())

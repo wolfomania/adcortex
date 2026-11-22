@@ -68,3 +68,18 @@ def test_arguments_default_to_tribe_settings() -> None:
 def test_english_uses_the_alignment_model_tribe_was_trained_with() -> None:
     assert runner.align_model_for("en") == "WAV2VEC2_ASR_LARGE_LV60K_960H"
     assert runner.align_model_for("de") is None
+
+
+def test_prefetch_takes_a_model_folder_and_languages() -> None:
+    args = runner.parse_prefetch_args(
+        ["--model-dir", "/models/whisperx", "--languages", "en, de"]
+    )
+
+    assert args.model == "large-v3"
+    assert str(args.model_dir) == "/models/whisperx"
+    assert args.languages == ["en", "de"]
+
+
+def test_prefetch_needs_a_model_folder() -> None:
+    with pytest.raises(SystemExit):
+        runner.parse_prefetch_args([])

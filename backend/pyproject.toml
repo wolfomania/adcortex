@@ -84,9 +84,9 @@ ignore = ["S101"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
-files = ["src", "tests"]
+files = ["src", "tests", "../deploy"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["tribev2.*", "neuralset.*", "pandas.*", "torch.*", "whisperx.*", "faster_whisper.*", "gtts.*"]
+module = ["huggingface_hub", "huggingface_hub.*", "tribev2.*", "neuralset.*", "pandas.*", "torch.*", "whisperx.*", "faster_whisper.*", "gtts.*"]
 ignore_missing_imports = true
