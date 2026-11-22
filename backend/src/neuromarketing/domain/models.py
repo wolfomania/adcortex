@@ -102,6 +102,7 @@ class AnalysisSummary(Frozen):
     response_index: float | None = None
     top_systems: tuple[str, ...] = ()
     headline: str | None = None
+    system_means: dict[str, float] = Field(default_factory=dict)
 
 
 class AnalysisState(Frozen):
