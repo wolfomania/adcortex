@@ -12,9 +12,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections.abc import Awaitable, Callable
+import threading
+from collections.abc import Awaitable, Callable, Coroutine
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic_ai.exceptions import (
     ContentFilterError,
@@ -167,9 +168,44 @@ async def call_with_backoff[T](
             attempt += 1
 
 
-def describe_failure(exc: BaseException) -> str:
+def describe_failure(
+    exc: BaseException, *, fallback: str = "Writing the report failed."
+) -> str:
     """A message for the person using the app; details go to the logs."""
     for types, message in FAILURES:
         if isinstance(exc, types):
             return message
-    return "Writing the report failed."
+    return fallback
+
+
+class _SharedLoop:
+    """One event loop, on its own thread, for every model call in the process.
+
+    Providers cache their HTTP clients between calls, and a client only works
+    on the loop its connections were opened on. `asyncio.run` would give each
+    call a new loop and close it afterwards.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._loop: asyncio.AbstractEventLoop | None = None
+
+    def run[T](self, coro: Coroutine[Any, Any, T]) -> T:
+        return asyncio.run_coroutine_threadsafe(coro, self._get()).result()
+
+    def _get(self) -> asyncio.AbstractEventLoop:
+        with self._lock:
+            if self._loop is None:
+                self._loop = asyncio.new_event_loop()
+                threading.Thread(
+                    target=self._loop.run_forever, name="llm-loop", daemon=True
+                ).start()
+            return self._loop
+
+
+_SHARED_LOOP = _SharedLoop()
+
+
+def run_sync[T](coro: Coroutine[Any, Any, T]) -> T:
+    """Run a model call from synchronous code, such as a pipeline job."""
+    return _SHARED_LOOP.run(coro)

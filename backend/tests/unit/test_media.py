@@ -143,6 +143,19 @@ def test_video_preview_downscales_and_adds_silent_audio(
     assert head.find(b"moov") != -1
 
 
+@pytest.mark.parametrize(
+    ("name", "video_s"), [("short_audio.mp4", 4.0), ("long_audio.mp4", 2.0)]
+)
+def test_video_preview_lasts_as_long_as_the_video(
+    media_dir: Path, tmp_path: Path, name: str, video_s: float
+) -> None:
+    dst = tmp_path / "preview.mp4"
+
+    make_video_preview(media_dir / name, dst, has_audio=True)
+
+    assert probe(dst).duration_s == pytest.approx(video_s, abs=0.15)
+
+
 def test_video_preview_keeps_portrait_orientation(
     media_dir: Path, tmp_path: Path
 ) -> None:

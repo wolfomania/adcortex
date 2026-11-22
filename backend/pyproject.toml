@@ -16,6 +16,7 @@ dependencies = [
     "numpy>=2.2.6",
     "pyyaml>=6.0.2",
     "pydantic-ai-slim[google,anthropic,openai]>=2.71",
+    "gtts>=2.5.4",
 ]
 
 [project.optional-dependencies]
@@ -87,5 +88,5 @@ files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["tribev2.*", "neuralset.*", "pandas.*", "torch.*", "whisperx.*", "faster_whisper.*"]
+module = ["tribev2.*", "neuralset.*", "pandas.*", "torch.*", "whisperx.*", "faster_whisper.*", "gtts.*"]
 ignore_missing_imports = true

@@ -37,7 +37,7 @@ from typing import Any
 
 import numpy as np
 
-from neuromarketing.brain.base import BrainPrediction, BrainRequest
+from neuromarketing.brain.base import TRIBE_NAME, BrainPrediction, BrainRequest
 from neuromarketing.brain.transcript import (
     AudioChunk,
     PlacedWord,
@@ -82,7 +82,7 @@ def patch_spacy() -> None:
 
 
 class TribeBrain:
-    name = "tribev2"
+    name = TRIBE_NAME
 
     def __init__(
         self,

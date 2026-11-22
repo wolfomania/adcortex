@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
-from collections.abc import Callable
+import threading
 from datetime import UTC, datetime
 from typing import Any
 
@@ -23,7 +24,6 @@ from pydantic_ai.messages import (
     TextPart,
     ToolCallPart,
     ToolReturnPart,
-    UserPromptPart,
 )
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
@@ -49,6 +49,7 @@ from neuromarketing.llm.client import (
     backoff_delay,
     describe_failure,
     load_llm,
+    run_sync,
 )
 from neuromarketing.llm.compare import write_comparison
 from neuromarketing.llm.prompts import report_brief
@@ -58,6 +59,7 @@ from neuromarketing.llm.report import (
     choose_input_mode,
     write_report,
 )
+from tests.llm_fakes import replying, report_args, user_parts
 
 DURATION = 12.4
 CATALOG = load_systems()
@@ -140,57 +142,6 @@ def _config(model: Any, **settings: Any) -> LlmConfig:
     return LlmConfig.from_model(model, "test-model", Settings(**settings))
 
 
-def _report_args(t: float = 5.0, scene_index: int = 0) -> dict[str, Any]:
-    return {
-        "headline": "Faces land at 5 s.",
-        "summary": "The face at 5 s drives the strongest response.",
-        "key_moments": [
-            {
-                "t": t,
-                "title": "Face appears",
-                "what_happens": "A face fills the frame.",
-                "brain_response": "Faces +2 SD.",
-                "why_it_matters": "Faces hold attention.",
-            }
-        ],
-        "scene_notes": [{"scene_index": scene_index, "note": "Opens on product."}],
-        "strengths": ["Strong face moment"],
-        "risks": ["Slow start"],
-        "recommendations": [
-            {"title": "Show the face earlier", "detail": "Move it to 1 s.", "t": 1.0}
-        ],
-    }
-
-
-def _replying(
-    args: Callable[[int], dict[str, Any]], seen: list[list[ModelMessage]] | None = None
-) -> Callable[[list[ModelMessage], AgentInfo], ModelResponse]:
-    """A FunctionModel body that calls the output tool with `args(call_number)`."""
-    calls = 0
-
-    def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
-        nonlocal calls
-        if seen is not None:
-            seen.append(messages)
-        tool = info.output_tools[0].name
-        reply = ModelResponse(parts=[ToolCallPart(tool, args(calls))])
-        calls += 1
-        return reply
-
-    return respond
-
-
-def _user_parts(messages: list[ModelMessage]) -> list[Any]:
-    parts: list[Any] = []
-    for message in messages:
-        if isinstance(message, ModelRequest):
-            for part in message.parts:
-                if isinstance(part, UserPromptPart):
-                    content = part.content
-                    parts.extend([content] if isinstance(content, str) else content)
-    return parts
-
-
 async def _no_sleep(_: float) -> None:
     return None
 
@@ -234,7 +185,7 @@ def test_video_goes_to_models_that_accept_it() -> None:
 
 def test_keyframes_replace_video_for_models_without_video_input() -> None:
     model = FunctionModel(
-        _replying(lambda _: _report_args()), profile={"supports_video_input": False}
+        replying(lambda _: report_args()), profile={"supports_video_input": False}
     )
 
     assert choose_input_mode(_config(model), _request()) == "keyframes"
@@ -253,7 +204,7 @@ def test_media_setting_limits_what_is_sent() -> None:
 def test_audio_analyses_send_audio_or_fall_back_to_text() -> None:
     request = _request(video=None, audio=b"wav", keyframes=(), kind=MediaKind.AUDIO)
     deaf = FunctionModel(
-        _replying(lambda _: _report_args()),
+        replying(lambda _: report_args()),
         profile={"supports_audio_file_input": False},
     )
 
@@ -280,11 +231,11 @@ async def test_report_from_test_model_is_schema_valid() -> None:
 
 async def test_prompt_carries_the_video_and_the_metrics() -> None:
     seen: list[list[ModelMessage]] = []
-    model = FunctionModel(_replying(lambda _: _report_args(), seen))
+    model = FunctionModel(replying(lambda _: report_args(), seen))
 
     await write_report(_config(model), _request(), catalog=CATALOG)
 
-    parts = _user_parts(seen[0])
+    parts = user_parts(seen[0])
     videos = [p for p in parts if isinstance(p, BinaryContent)]
     assert [v.media_type for v in videos] == ["video/mp4"]
     brief = next(p for p in parts if isinstance(p, str) and "Per-second" in p)
@@ -294,7 +245,7 @@ async def test_prompt_carries_the_video_and_the_metrics() -> None:
 async def test_out_of_range_timestamps_are_sent_back_for_correction() -> None:
     seen: list[list[ModelMessage]] = []
     model = FunctionModel(
-        _replying(lambda call: _report_args(t=99.0 if call == 0 else 5.0), seen)
+        replying(lambda call: report_args(t=99.0 if call == 0 else 5.0), seen)
     )
 
     stored = await write_report(_config(model), _request(), catalog=CATALOG)
@@ -310,7 +261,7 @@ async def test_out_of_range_timestamps_are_sent_back_for_correction() -> None:
 
 async def test_unknown_scene_index_is_sent_back_for_correction() -> None:
     model = FunctionModel(
-        _replying(lambda call: _report_args(scene_index=7 if call == 0 else 1))
+        replying(lambda call: report_args(scene_index=7 if call == 0 else 1))
     )
 
     stored = await write_report(_config(model), _request(), catalog=CATALOG)
@@ -322,11 +273,11 @@ async def test_rejected_video_falls_back_to_keyframes() -> None:
     def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
         if any(
             isinstance(p, BinaryContent) and p.media_type == "video/mp4"
-            for p in _user_parts(messages)
+            for p in user_parts(messages)
         ):
             raise ModelRequestRejectedError("fn", "video too long")
         return ModelResponse(
-            parts=[ToolCallPart(info.output_tools[0].name, _report_args())]
+            parts=[ToolCallPart(info.output_tools[0].name, report_args())]
         )
 
     stored = await write_report(
@@ -346,7 +297,7 @@ async def test_rate_limits_are_retried_after_the_requested_wait() -> None:
         if attempts == 1:
             raise ModelRateLimitError("fn", "slow down", retry_after=7.0)
         return ModelResponse(
-            parts=[ToolCallPart(info.output_tools[0].name, _report_args())]
+            parts=[ToolCallPart(info.output_tools[0].name, report_args())]
         )
 
     async def record(seconds: float) -> None:
@@ -381,7 +332,7 @@ async def test_exhausted_quota_is_not_retried() -> None:
 
 async def test_times_just_past_the_end_are_clamped_without_a_retry() -> None:
     seen: list[list[ModelMessage]] = []
-    model = FunctionModel(_replying(lambda _: _report_args(t=DURATION + 0.3), seen))
+    model = FunctionModel(replying(lambda _: report_args(t=DURATION + 0.3), seen))
 
     stored = await write_report(_config(model), _request(), catalog=CATALOG)
 
@@ -396,7 +347,7 @@ async def test_json_output_modes_are_validated_too(mode: str) -> None:
     def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
         nonlocal calls
         calls += 1
-        args = _report_args(t=99.0 if calls == 1 else 5.0)
+        args = report_args(t=99.0 if calls == 1 else 5.0)
         return ModelResponse(parts=[TextPart(json.dumps(args))])
 
     model = FunctionModel(respond, profile={"supports_json_schema_output": True})
@@ -410,27 +361,27 @@ async def test_json_output_modes_are_validated_too(mode: str) -> None:
 
 async def test_audio_analyses_send_the_audio() -> None:
     seen: list[list[ModelMessage]] = []
-    model = FunctionModel(_replying(lambda _: _report_args(), seen))
+    model = FunctionModel(replying(lambda _: report_args(), seen))
     request = _request(video=None, audio=b"wav", keyframes=(), kind=MediaKind.AUDIO)
 
     stored = await write_report(_config(model), request, catalog=CATALOG)
 
     assert stored.input_mode == "audio"
-    sent = [p.media_type for p in _user_parts(seen[0]) if isinstance(p, BinaryContent)]
+    sent = [p.media_type for p in user_parts(seen[0]) if isinstance(p, BinaryContent)]
     assert sent == ["audio/wav"]
 
 
 async def test_keyframes_are_sampled_and_labelled_with_scene_times() -> None:
     seen: list[list[ModelMessage]] = []
     model = FunctionModel(
-        _replying(lambda _: _report_args(), seen),
+        replying(lambda _: report_args(), seen),
         profile={"supports_video_input": False},
     )
     frames = tuple((i % 2, b"jpg") for i in range(40))
 
     await write_report(_config(model), _request(keyframes=frames), catalog=CATALOG)
 
-    parts = _user_parts(seen[0])
+    parts = user_parts(seen[0])
     assert sum(isinstance(p, BinaryContent) for p in parts) == 16
     assert "Scene 1 (6.0-12.4 s):" in parts
 
@@ -582,7 +533,7 @@ async def test_comparison_names_both_analyses() -> None:
         "b_strengths": ["Hook"],
         "recommendation": "Keep B's opening.",
     }
-    model = FunctionModel(_replying(lambda _: args, seen))
+    model = FunctionModel(replying(lambda _: args, seen))
     a = (_meta(), _result())
     b = (
         _meta().model_copy(
@@ -595,6 +546,41 @@ async def test_comparison_names_both_analyses() -> None:
 
     assert stored.report.headline == "B hooks faster."
     assert (stored.a_id, stored.b_id) == (a[0].id, b[0].id)
-    prompt = next(p for p in _user_parts(seen[0]) if isinstance(p, str))
+    prompt = next(p for p in user_parts(seen[0]) if isinstance(p, str))
     assert "# A: Morning coffee" in prompt
     assert "# B: Evening tea" in prompt
+
+
+def test_failure_messages_can_name_the_task() -> None:
+    message = describe_failure(RuntimeError("boom"), fallback="Comparing failed.")
+
+    assert message == "Comparing failed."
+
+
+# ── model calls from synchronous code ──────────────────────────────────────
+
+
+async def _running_loop() -> asyncio.AbstractEventLoop:
+    return asyncio.get_running_loop()
+
+
+def test_sync_model_calls_share_one_event_loop_across_threads() -> None:
+    from_thread: list[asyncio.AbstractEventLoop] = []
+    thread = threading.Thread(
+        target=lambda: from_thread.append(run_sync(_running_loop()))
+    )
+
+    first = run_sync(_running_loop())
+    thread.start()
+    thread.join(5)
+
+    assert run_sync(_running_loop()) is first
+    assert from_thread == [first]
+
+
+def test_errors_from_sync_model_calls_propagate() -> None:
+    async def fail() -> None:
+        raise ValueError("bad output")
+
+    with pytest.raises(ValueError, match="bad output"):
+        run_sync(fail())

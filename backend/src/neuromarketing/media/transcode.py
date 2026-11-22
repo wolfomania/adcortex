@@ -32,6 +32,7 @@ _SCALE = _scale(MAX_SHORT_SIDE)
 
 
 def make_video_preview(src: Path, dst: Path, *, has_audio: bool) -> None:
+    """The video defines the length: audio is padded with silence or cut."""
     dst.parent.mkdir(parents=True, exist_ok=True)
     inputs: list[str | Path] = ["-i", src]
     audio_map = "0:a:0"
@@ -47,6 +48,8 @@ def make_video_preview(src: Path, dst: Path, *, has_audio: bool) -> None:
             audio_map,
             "-vf",
             _SCALE,
+            "-af",
+            "apad",
             "-c:v",
             "libx264",
             "-preset",

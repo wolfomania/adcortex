@@ -15,6 +15,9 @@ from neuromarketing.domain.models import Word
 
 BrainInputKind = Literal["video", "audio"]
 
+# Model name of TRIBE v2 predictions, local or on the GPU worker.
+TRIBE_NAME = "tribev2"
+
 
 @dataclass(frozen=True)
 class BrainRequest:

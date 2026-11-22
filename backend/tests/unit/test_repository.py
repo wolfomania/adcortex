@@ -300,3 +300,27 @@ def test_delete_keeps_a_fingerprint_that_moved_to_another_analysis(
 def test_deleting_an_unknown_analysis_is_not_found(repo: AnalysisRepository) -> None:
     with pytest.raises(NotFoundError):
         repo.delete(NEW)
+
+
+def test_artifact_checks_and_batch_reads(repo: AnalysisRepository) -> None:
+    _create(repo, NEW)
+    repo.put_artifact_bytes(NEW, "keyframes/000.jpg", b"jpg")
+
+    assert repo.has_artifact(NEW, "keyframes/000.jpg")
+    assert not repo.has_artifact(NEW, "llm.mp4")
+    assert repo.read_artifacts(NEW, ["keyframes/000.jpg", "llm.mp4"]) == {
+        "keyframes/000.jpg": b"jpg",
+        "llm.mp4": None,
+    }
+
+
+def test_discard_removes_what_a_job_wrote_after_deletion(
+    repo: AnalysisRepository,
+) -> None:
+    _create(repo, OLD, NEW)
+    repo.delete(NEW)
+    repo.put_artifact_bytes(NEW, PREDICTION, b"late write")
+
+    repo.discard(NEW)
+
+    assert repo.store.list_dir("analyses") == [OLD]

@@ -105,5 +105,28 @@ def media_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
         "aac",
         str(root / "tone.m4a"),
     )
+    for name, video_s, audio_s in (
+        ("short_audio.mp4", 4, 1.5),
+        ("long_audio.mp4", 2, 4),
+    ):
+        _ffmpeg(
+            "-f",
+            "lavfi",
+            "-i",
+            f"testsrc2=s=320x240:d={video_s}:r=25",
+            "-f",
+            "lavfi",
+            "-i",
+            f"sine=frequency=440:duration={audio_s}",
+            "-c:v",
+            "libx264",
+            "-pix_fmt",
+            "yuv420p",
+            "-preset",
+            "ultrafast",
+            "-c:a",
+            "aac",
+            str(root / name),
+        )
     (root / "junk.mp4").write_bytes(b"this is not a video file at all")
     return root

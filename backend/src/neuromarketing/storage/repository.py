@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
@@ -158,6 +158,10 @@ class AnalysisRepository:
             if analysis_id in name.removesuffix(".json").split("--"):
                 self.store.remove(f"{COMPARISONS}/{name}")
 
+    def discard(self, analysis_id: str) -> None:
+        """Remove files a job wrote after its analysis was deleted."""
+        self.store.remove(f"{ANALYSES}/{require_analysis_id(analysis_id)}")
+
     # ── artifacts ──────────────────────────────────────────────────────────
 
     def put_artifacts(self, analysis_id: str, files: Mapping[str, Path]) -> None:
@@ -167,6 +171,16 @@ class AnalysisRepository:
 
     def put_artifact_bytes(self, analysis_id: str, name: str, data: bytes) -> None:
         self.store.write_bytes(self._doc(analysis_id, name), data)
+
+    def has_artifact(self, analysis_id: str, name: str) -> bool:
+        return self.store.exists(self._doc(analysis_id, name))
+
+    def read_artifacts(
+        self, analysis_id: str, names: Sequence[str]
+    ) -> dict[str, bytes | None]:
+        """Read several artifacts at once; missing ones map to None."""
+        found = self.store.read_many([self._doc(analysis_id, n) for n in names])
+        return {name: found.get(self._doc(analysis_id, name)) for name in names}
 
     def read_artifact(self, analysis_id: str, name: str) -> bytes:
         try:
