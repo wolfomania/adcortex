@@ -29,6 +29,7 @@ export default defineConfig({
     // scripts/check-size.mjs reads the manifest to measure the upload route.
     manifest: true,
     target: 'es2022',
-    chunkSizeWarningLimit: 800,
+    // The 3D brain view (three.js, ~245 kB gzip) is a lazy chunk of the results page.
+    chunkSizeWarningLimit: 1000,
   },
 })
