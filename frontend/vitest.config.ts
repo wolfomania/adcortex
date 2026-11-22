@@ -10,6 +10,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // The mock backend synthesizes brain frames on the CPU; allow for slow runners.
+    testTimeout: 15_000,
     setupFiles: ['src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     restoreMocks: true,
@@ -28,8 +30,7 @@ export default defineConfig({
         'src/mocks/browser.ts',
         // Entry point and WebGL scene graph; jsdom has no WebGL context.
         'src/main.tsx',
-        'src/features/brain/BrainScene.tsx',
-        'src/features/brain/BrainCanvas.tsx',
+        'src/features/brain/BrainView.tsx',
         'src/vite-env.d.ts',
       ],
       reporter: ['text-summary', 'text', 'html'],

@@ -6,3 +6,4 @@ src/api/schema.json
 src/api/schema.ts
 src/features/systems/catalog.json
 public/brain
+src/mocks/media
