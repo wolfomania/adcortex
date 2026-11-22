@@ -85,7 +85,7 @@ class LanguageInfo(Frozen):
 
 
 LlmStatus = Literal["ok", "skipped", "failed"]
-LlmInputMode = Literal["video", "keyframes", "text"]
+LlmInputMode = Literal["video", "audio", "keyframes", "text"]
 
 
 class LlmInfo(Frozen):
@@ -286,3 +286,11 @@ class ComparisonReport(BaseModel):
     a_strengths: list[str] = Field(min_length=1, max_length=5)
     b_strengths: list[str] = Field(min_length=1, max_length=5)
     recommendation: str = Field(description="Which elements to keep from each.")
+
+
+class StoredComparison(Frozen):
+    a_id: str
+    b_id: str
+    model: str
+    created_at: datetime = Field(default_factory=utcnow)
+    report: ComparisonReport

@@ -83,7 +83,7 @@ ignore = ["S101"]
 python_version = "3.12"
 strict = true
 mypy_path = "src"
-packages = ["neuromarketing"]
+files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]

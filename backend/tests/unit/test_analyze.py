@@ -6,7 +6,7 @@ import pytest
 from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
 from neuromarketing.analysis.baseline import Baseline, SystemStats
 from neuromarketing.analysis.library import apply_library, library_percentiles
-from neuromarketing.analysis.run import AnalysisInputs, analyze
+from neuromarketing.analysis.run import AnalysisInputs, AnalysisOutput, analyze
 from neuromarketing.analysis.systems import load_systems
 from neuromarketing.brain.base import BrainPrediction
 from neuromarketing.domain.models import LanguageInfo, MediaKind, Scene
@@ -59,7 +59,7 @@ def _baseline() -> Baseline:
 
 
 def test_timeline_matches_media_duration_not_segment_count() -> None:
-    out = analyze(_inputs(drop_second=3), **_deps(None))
+    out = _analyze(_inputs(drop_second=3), None)
 
     assert out.result.duration_s == DURATION
     assert out.result.times == tuple(float(s) for s in range(13))
@@ -69,7 +69,7 @@ def test_timeline_matches_media_duration_not_segment_count() -> None:
 
 
 def test_without_baseline_reports_relative_values_only() -> None:
-    out = analyze(_inputs(), **_deps(None))
+    out = _analyze(_inputs(), None)
 
     assert out.result.baseline is None
     assert out.result.scores.response_index is None
@@ -78,7 +78,7 @@ def test_without_baseline_reports_relative_values_only() -> None:
 
 
 def test_with_baseline_ranks_systems_and_scores() -> None:
-    out = analyze(_inputs(), **_deps(_baseline()))
+    out = _analyze(_inputs(), _baseline())
 
     faces = next(s for s in out.result.systems if s.id == "faces")
     # Clip mean is 2.0 / 13 = 0.15: above 4 of the 5 reference clip means.
@@ -90,7 +90,7 @@ def test_with_baseline_ranks_systems_and_scores() -> None:
 
 
 def test_planted_faces_response_becomes_a_peak_moment() -> None:
-    out = analyze(_inputs(faces_peak_at=5), **_deps(None))
+    out = _analyze(_inputs(faces_peak_at=5), None)
 
     peaks = [
         m for m in out.result.moments if m.kind == "peak" and m.system_id == "faces"
@@ -101,7 +101,7 @@ def test_planted_faces_response_becomes_a_peak_moment() -> None:
 
 
 def test_audio_input_marks_visual_systems_not_applicable() -> None:
-    out = analyze(_inputs(kind=MediaKind.AUDIO), **_deps(_baseline()))
+    out = _analyze(_inputs(kind=MediaKind.AUDIO), _baseline())
 
     applicable = {s.id: s.applicable for s in out.result.systems}
     assert applicable["faces"] is False
@@ -113,7 +113,7 @@ def test_audio_input_marks_visual_systems_not_applicable() -> None:
 
 
 def test_scene_stats_average_seconds_inside_each_scene() -> None:
-    out = analyze(_inputs(faces_peak_at=5), **_deps(None))
+    out = _analyze(_inputs(faces_peak_at=5), None)
 
     first, second = out.result.scene_stats
     assert first.scene_index == 0
@@ -121,7 +121,7 @@ def test_scene_stats_average_seconds_inside_each_scene() -> None:
 
 
 def test_frames_cover_every_second_and_vertex() -> None:
-    out = analyze(_inputs(), **_deps(None))
+    out = _analyze(_inputs(), None)
 
     assert out.result.frames is not None
     assert out.result.frames.n_frames == 13
@@ -129,7 +129,7 @@ def test_frames_cover_every_second_and_vertex() -> None:
 
 
 def test_summary_lists_top_systems_and_raw_means() -> None:
-    out = analyze(_inputs(), **_deps(_baseline()))
+    out = _analyze(_inputs(), _baseline())
 
     assert out.summary.top_systems[0] == "faces"
     assert set(out.summary.system_means) == set(load_systems().ids)
@@ -145,7 +145,7 @@ def test_library_percentiles_need_ten_analyses() -> None:
 
 
 def test_apply_library_sets_library_percentile() -> None:
-    out = analyze(_inputs(), **_deps(None))
+    out = _analyze(_inputs(), None)
 
     updated = apply_library(out.result, {"faces": 80.0})
 
@@ -156,5 +156,7 @@ def test_apply_library_sets_library_percentile() -> None:
     )
 
 
-def _deps(baseline: Baseline | None) -> dict[str, object]:
-    return {"catalog": load_systems(), "atlas": load_atlas(), "baseline": baseline}
+def _analyze(inputs: AnalysisInputs, baseline: Baseline | None) -> AnalysisOutput:
+    return analyze(
+        inputs, catalog=load_systems(), atlas=load_atlas(), baseline=baseline
+    )

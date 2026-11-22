@@ -13,6 +13,7 @@ from neuromarketing.media.scenes import build_scenes, detect_cuts, uniform_segme
 from neuromarketing.media.thumbnails import extract_keyframes, extract_strip
 from neuromarketing.media.transcode import (
     make_audio_preview,
+    make_llm_video,
     make_video_preview,
     to_wav,
 )
@@ -151,6 +152,25 @@ def test_video_preview_keeps_portrait_orientation(
 
     info = probe(dst)
     assert (info.width, info.height) == (360, 640)
+
+
+def test_llm_video_is_small_and_samples_two_frames_per_second(
+    media_dir: Path, tmp_path: Path
+) -> None:
+    dst = tmp_path / "llm.mp4"
+
+    make_llm_video(media_dir / "three_scenes.mp4", dst, has_audio=True)
+    make_llm_video(
+        media_dir / "silent_1080p.mp4", tmp_path / "silent.mp4", has_audio=False
+    )
+
+    info = probe(dst)
+    assert info.fps == pytest.approx(2.0)
+    assert info.audio_codec == "aac"
+    assert info.duration_s == pytest.approx(6.0, abs=0.6)
+    silent = probe(tmp_path / "silent.mp4")
+    assert (silent.width, silent.height) == (640, 360)
+    assert not silent.has_audio
 
 
 def test_audio_preview_and_wav(media_dir: Path, tmp_path: Path) -> None:

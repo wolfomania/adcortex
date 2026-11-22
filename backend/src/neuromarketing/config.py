@@ -43,7 +43,12 @@ class Settings(BaseSettings):
     min_scene_s: float = 1.0
 
     llm_model: str | None = None
-    llm_video_input: Literal["auto", "off"] = "auto"
+    # Richest input the report model may receive: the video (or audio) itself,
+    # scene keyframes only, or text only. Free tiers may train on uploads.
+    llm_media: Literal["video", "keyframes", "text"] = "video"
+    # How the model returns the report: an output tool call (default), the
+    # provider's native JSON schema mode, or JSON described in the prompt.
+    llm_output_mode: Literal["tool", "native", "prompted"] = "tool"
     llm_timeout_s: float = 240.0
     llm_retries: int = 2
 
