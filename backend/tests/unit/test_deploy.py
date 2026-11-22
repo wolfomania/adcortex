@@ -66,3 +66,19 @@ def test_the_gpu_image_gets_the_backend_dependencies(deploy: ModuleType) -> None
 
     assert any(r.startswith("fastapi") for r in requirements)
     assert any(r.startswith("modal") for r in requirements)
+
+
+def test_warns_when_anyone_could_use_the_deployment(
+    deploy: ModuleType, capsys: pytest.CaptureFixture[str]
+) -> None:
+    deploy.warn_if_open({"NM_LLM_MODEL": "google:gemini-4-hydrogen"})
+
+    assert "NM_PASSWORD is not set" in capsys.readouterr().err
+
+
+def test_stays_quiet_when_a_password_protects_the_deployment(
+    deploy: ModuleType, capsys: pytest.CaptureFixture[str]
+) -> None:
+    deploy.warn_if_open({"NM_PASSWORD": "a long passphrase"})
+
+    assert capsys.readouterr().err == ""

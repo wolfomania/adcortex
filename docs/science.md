@@ -20,8 +20,8 @@ sales.
    detects the language (`brain/transcript.py`, `brain/whisperx_runner.py`).
 3. **Predict.** TRIBE v2 (d'Ascoli et al., 2026) predicts the fMRI response on
    the fsaverage5 cortical mesh: 20,484 vertices, 10,242 per hemisphere. It
-   sees the video through V-JEPA 2, hears the audio through Wav2Vec-BERT, and
-   reads the words through Llama 3.2 3B (`brain/tribe.py`).
+   sees the video through V-JEPA 2, hears the audio through Wav2Vec-BERT 2.0,
+   and reads the words through Llama 3.2 3B (`brain/tribe.py`).
 4. **Align to seconds.** The predictions go on a 1 Hz grid: row *k* holds the
    prediction whose segment starts in [*k*, *k* + 1). Seconds the model skipped
    stay empty instead of shifting later seconds (`analysis/curves.py`).
@@ -174,7 +174,7 @@ back to the model to correct.
 - **HCP-MMP1.0** data are redistributed under the WU-Minn HCP Open Access Data
   Use Terms. The required acknowledgment is in
   `backend/src/neuromarketing/data/README.md`.
-- The other models TRIBE v2 uses (V-JEPA 2, Wav2Vec-BERT, and DINOv2) and
+- The other models TRIBE v2 uses (V-JEPA 2, Wav2Vec-BERT 2.0, and DINOv2) and
   WhisperX's transcription and alignment models carry their own licenses; read
   their model cards before any commercial use.
 

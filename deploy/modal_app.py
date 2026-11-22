@@ -24,6 +24,8 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import sys
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -65,6 +67,11 @@ GATED_MODEL = (
     "license at https://huggingface.co/meta-llama/Llama-3.2-3B, then set HF_TOKEN "
     "in .env to a token of that account."
 )
+OPEN_DEPLOYMENT = (
+    "Warning: NM_PASSWORD is not set, so anyone who finds the app's URL can "
+    "run analyses on your GPU and read or delete every analysis. Set "
+    "NM_PASSWORD in .env and deploy again to require a login.\n"
+)
 
 # Settings the deployment decides: values from a local `.env` would point at
 # backends or paths that don't exist on Modal.
@@ -94,6 +101,12 @@ def secret_values(env_file: Path) -> dict[str, str | None]:
     }
 
 
+def warn_if_open(values: Mapping[str, str | None]) -> None:
+    """Say so when the deployment will let in anyone who has its URL."""
+    if not values.get("NM_PASSWORD"):
+        sys.stderr.write(OPEN_DEPLOYMENT)
+
+
 def backend_requirements() -> list[str]:
     """The backend's runtime dependencies, resolved together with TRIBE's pins."""
     import tomllib
@@ -111,7 +124,10 @@ def with_backend(image: modal.Image) -> modal.Image:
 
 
 app = modal.App(APP_NAME)
-env_secret = modal.Secret.from_dict(secret_values(ENV_FILE) if modal.is_local() else {})
+deploy_values = secret_values(ENV_FILE) if modal.is_local() else {}
+if modal.is_local():
+    warn_if_open(deploy_values)
+env_secret = modal.Secret.from_dict(deploy_values)
 models_volume = modal.Volume.from_name("nm-models", create_if_missing=True, version=2)
 
 # ── CPU image: API, pipeline, and the app built with pnpm ───────────────────

@@ -37,6 +37,12 @@ The first build is the slow one, mostly for PyTorch in the two Python
 environments of the GPU image. Later deploys reuse the cached layers; backend
 code is mounted at start-up and never triggers a rebuild.
 
+Set `NM_PASSWORD`. The app's URL is public and easy to guess
+(`https://<workspace>--neuromarketing-web.modal.run`), and without a password
+anyone who finds it can run analyses on your GPU and read or delete every
+analysis. `make deploy` prints a warning when the password is missing. Share
+links keep working for people without the password.
+
 ## What runs where
 
 | Part | Hardware | Lifetime |

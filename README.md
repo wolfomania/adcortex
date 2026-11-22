@@ -66,9 +66,12 @@ or ffmpeg. The screenshots on this page come from it.
 ## Deploy on Modal
 
 ```sh
-cp .env.example .env   # set HF_TOKEN; optionally NM_LLM_MODEL, its key, NM_PASSWORD
+cp .env.example .env   # set HF_TOKEN and NM_PASSWORD; optionally NM_LLM_MODEL and its key
 make deploy
 ```
+
+Set `NM_PASSWORD`: without it, anyone who finds the app's URL can run
+analyses on your GPU and read or delete every analysis.
 
 The first deploy downloads about 20 GB of models into a Modal Volume and
 builds the images; later deploys reuse both. The GPU worker (an L4 by
