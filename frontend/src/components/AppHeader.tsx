@@ -35,7 +35,7 @@ export function AppHeader({ isReadOnly = false }: AppHeaderProps) {
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md supports-backdrop-filter:bg-background/70">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
         <Link to="/" className="rounded-md" aria-label="Neuro Validator, new analysis">
           <Logo />
         </Link>
@@ -46,7 +46,7 @@ export function AppHeader({ isReadOnly = false }: AppHeaderProps) {
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.exact, includeSearch: false }}
-                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground"
+                className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[status=active]:bg-secondary data-[status=active]:text-foreground sm:px-3"
               >
                 {item.label}
               </Link>
@@ -62,7 +62,7 @@ export function AppHeader({ isReadOnly = false }: AppHeaderProps) {
               disabled={logout.isPending}
             >
               <LogOut aria-hidden />
-              Log out
+              <span className="sr-only sm:not-sr-only">Log out</span>
             </Button>
           ) : null}
         </div>

@@ -20,6 +20,8 @@ describe('timeline helpers', () => {
     expect(timeTicks(8)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8])
     expect(timeTicks(30)).toEqual([0, 5, 10, 15, 20, 25, 30])
     expect(timeTicks(180)).toEqual([0, 30, 60, 90, 120, 150, 180])
+    // A phone-width track has room for fewer labels.
+    expect(timeTicks(30, 3)).toEqual([0, 10, 20, 30])
   })
 
   it('averages present values only', () => {

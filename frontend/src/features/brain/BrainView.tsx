@@ -45,6 +45,8 @@ const VIEW_DIRECTIONS: Record<BrainViewName, [number, number, number]> = {
 /** Millimetres between the hemispheres, so inflated surfaces don't overlap. */
 const GAP_MM = 8
 const FOV = 28
+/** Room around the brain when a view preset frames it. */
+const FRAME_MARGIN = 1.1
 /** Repaints per second at most while the media plays. */
 const PAINT_RATE = 30
 
@@ -64,7 +66,9 @@ interface Scene {
   colorAttributes: BufferAttribute[]
   colors: Float32Array
   center: Vector3
-  distance: number
+  radius: number
+  /** Vertex positions of each hemisphere, as drawn. */
+  points: Float32Array[]
 }
 
 function buildScene(assets: BrainAssets, surface: Surface): Scene {
@@ -72,6 +76,7 @@ function buildScene(assets: BrainAssets, surface: Surface): Scene {
   const bounds = new Box3()
   const geometries: BufferGeometry[] = []
   const colorAttributes: BufferAttribute[] = []
+  const points: Float32Array[] = []
   HEMISPHERES.forEach((hemisphere, h) => {
     const source = assets.mesh.positions[surface][hemisphere]
     const extent = new Box3().setFromArray(source)
@@ -96,27 +101,50 @@ function buildScene(assets: BrainAssets, surface: Surface): Scene {
     }
     geometries.push(geometry)
     colorAttributes.push(colorAttribute)
+    points.push(positions)
   })
   const center = bounds.getCenter(new Vector3())
   const radius = bounds.getSize(new Vector3()).length() / 2
-  const distance = (radius / Math.sin(((FOV / 2) * Math.PI) / 180)) * 0.9
-  return { geometries, colorAttributes, colors, center, distance }
+  return { geometries, colorAttributes, colors, center, radius, points }
 }
 
-/** Points the camera at the brain from one of the preset directions. */
-function aim(
-  controls: OrbitControls,
-  view: BrainViewName,
-  center: Vector3,
-  distance: number,
-): void {
+/**
+ * The closest the camera can be, looking at `center` from its current
+ * direction, with every vertex (and a margin) still in the frame.
+ */
+function fitDistance(camera: PerspectiveCamera, center: Vector3, points: Float32Array[]): number {
+  camera.lookAt(center)
+  camera.updateMatrixWorld()
+  const right = new Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+  const up = new Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
+  const toward = new Vector3().setFromMatrixColumn(camera.matrixWorld, 2)
+  const tanV = Math.tan((camera.fov * Math.PI) / 360)
+  const tanH = tanV * camera.aspect
+  const offset = new Vector3()
+  let distance = 0
+  for (const array of points) {
+    for (let i = 0; i < array.length; i += 3) {
+      offset.set(array[i]! - center.x, array[i + 1]! - center.y, array[i + 2]! - center.z)
+      const across = Math.abs(offset.dot(right)) / tanH
+      const along = Math.abs(offset.dot(up)) / tanV
+      distance = Math.max(distance, offset.dot(toward) + FRAME_MARGIN * Math.max(across, along))
+    }
+  }
+  return distance
+}
+
+/** Frames the brain from one of the preset directions. */
+function aim(controls: OrbitControls, view: BrainViewName, scene: Scene): void {
   const camera = controls.object as PerspectiveCamera
   const [x, y, z] = VIEW_DIRECTIONS[view]
-  camera.position.copy(center).add(new Vector3(x, y, z).normalize().multiplyScalar(distance))
-  camera.near = distance / 20
-  camera.far = distance * 10
+  const direction = new Vector3(x, y, z).normalize()
+  camera.position.copy(scene.center).add(direction)
+  const distance = fitDistance(camera, scene.center, scene.points)
+  camera.position.copy(scene.center).addScaledVector(direction, distance)
+  camera.near = scene.radius / 10
+  camera.far = scene.radius * 20
   camera.updateProjectionMatrix()
-  controls.target.copy(center)
+  controls.target.copy(scene.center)
   controls.update()
 }
 
@@ -138,18 +166,12 @@ function createPainter(
   }
 }
 
-function Controls({
-  view,
-  center,
-  distance,
-}: {
-  view: BrainViewName
-  center: Vector3
-  distance: number
-}) {
+function Controls({ view, scene }: { view: BrainViewName; scene: Scene }) {
   const camera = useThree((state) => state.camera)
   const element = useThree((state) => state.gl.domElement)
   const invalidate = useThree((state) => state.invalidate)
+  // Reframes when the canvas changes shape, as on a phone turning sideways.
+  const aspect = useThree((state) => state.size.width / state.size.height)
   const controls = useRef<OrbitControls>(null)
 
   useEffect(() => {
@@ -164,10 +186,10 @@ function Controls({
 
   useEffect(() => {
     if (controls.current) {
-      aim(controls.current, view, center, distance)
+      aim(controls.current, view, scene)
       invalidate()
     }
-  }, [view, center, distance, invalidate])
+  }, [view, scene, aspect, invalidate])
 
   useFrame(() => {
     // Damping keeps the view moving after a drag; render until it settles.
@@ -182,8 +204,8 @@ function Controls({
       args={[camera, element]}
       enableDamping
       enablePan={false}
-      minDistance={distance * 0.45}
-      maxDistance={distance * 2.5}
+      minDistance={scene.radius * 1.5}
+      maxDistance={scene.radius * 8}
     />
   )
 }
@@ -246,7 +268,7 @@ function Cortex({ assets, frames, range, surface, view, playback, onHover }: Bra
           <meshLambertMaterial vertexColors />
         </mesh>
       ))}
-      <Controls view={view} center={scene.center} distance={scene.distance} />
+      <Controls view={view} scene={scene} />
     </>
   )
 }

@@ -34,9 +34,14 @@ const SYSTEM_OF_PARCEL = new Map(
   ),
 )
 
+/** The canvas shape: 4:3 in one column, 16:9 beside the video. */
+const FRAME_SHAPE = 'aspect-[4/3] w-full lg:aspect-video'
+
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-sunken p-6 text-center text-sm text-muted-foreground">
+    <div
+      className={`flex ${FRAME_SHAPE} items-center justify-center rounded-lg bg-sunken p-6 text-center text-sm text-muted-foreground`}
+    >
       {children}
     </div>
   )
@@ -109,10 +114,10 @@ export function BrainPanel({ result, source }: { result: AnalysisResult; source:
   } else if (assets.isError || frames.isError || (frames.data && !frameSet)) {
     body = <Frame>The brain maps could not load. Reload the page to try again.</Frame>
   } else if (!assets.data || !frameSet) {
-    body = <Skeleton className="aspect-[4/3] w-full rounded-lg" />
+    body = <Skeleton className={`${FRAME_SHAPE} rounded-lg`} />
   } else {
     body = (
-      <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-sunken">
+      <div className={`${FRAME_SHAPE} overflow-hidden rounded-lg bg-sunken`}>
         <Suspense fallback={<Skeleton className="size-full" />}>
           <BrainView
             assets={assets.data}

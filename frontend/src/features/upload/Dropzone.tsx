@@ -164,8 +164,10 @@ export function Dropzone({
         <span className="text-primary underline-offset-4 group-hover:underline">browse</span>
       </span>
       <span id={hintId} className="relative mt-1.5 text-sm text-muted-foreground">
-        {FORMAT_HINT[kind]} · up to {maxMb} MB · {durationRange[0]} s to{' '}
-        {formatDuration(durationRange[1])}
+        {FORMAT_HINT[kind]} ·{' '}
+        <span className="whitespace-nowrap">
+          up to {maxMb} MB · {durationRange[0]} s to {formatDuration(durationRange[1])}
+        </span>
       </span>
       <span className="sr-only">Choose a {noun}</span>
     </label>

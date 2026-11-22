@@ -58,7 +58,7 @@ export function ScoreCards({ result }: { result: AnalysisResult }) {
       </dl>
       <p className="text-xs text-muted-foreground">
         {baseline
-          ? `Reference: ${baseline.n_clips} ads (${baseline.description}).`
+          ? `Reference library ${baseline.version}: ${baseline.description}`
           : 'No reference library is installed, so the scores and percentiles are unavailable.'}
       </p>
     </section>

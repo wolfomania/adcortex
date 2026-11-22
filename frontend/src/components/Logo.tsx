@@ -36,8 +36,9 @@ export function Logo({ className }: LogoProps) {
   return (
     <span className={cn('flex items-center gap-2.5', className)}>
       <LogoMark />
-      <span className="flex flex-col leading-none">
-        <span className="text-[15px] font-semibold tracking-tight text-foreground">
+      {/* Phones show the mark alone; the link carries the name. */}
+      <span className="hidden flex-col leading-none sm:flex">
+        <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap text-foreground">
           Neuro Validator
         </span>
         <span className="mt-1 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">

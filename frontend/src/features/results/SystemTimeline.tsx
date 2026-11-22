@@ -10,6 +10,28 @@ import { cn } from '@/lib/utils'
 import { usePlayback, usePlaybackTime } from './playback'
 import { heatFill, timeAtX, timeTicks } from './timeline'
 
+/** Room for each time label on the axis. */
+const TICK_SPACING_PX = 64
+
+/** How many axis intervals fit the track's current width. */
+function useTickBudget(track: React.RefObject<HTMLDivElement | null>): number {
+  const [budget, setBudget] = useState(10)
+  useEffect(() => {
+    const element = track.current
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) {
+        setBudget(Math.max(2, Math.floor(entry.contentRect.width / TICK_SPACING_PX)))
+      }
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [track])
+  return budget
+}
+
 const ROW_PX = 22
 const STRIP_PX = 44
 const MAX_TILES = 60
@@ -50,6 +72,7 @@ export function SystemTimeline({
   const playback = usePlayback()
   const second = usePlaybackTime(1)
   const track = useRef<HTMLDivElement>(null)
+  const tickBudget = useTickBudget(track)
   const playhead = useRef<HTMLDivElement>(null)
   const [hover, setHover] = useState<{ t: number; row: number } | null>(null)
   const duration = result.duration_s
@@ -103,7 +126,7 @@ export function SystemTimeline({
             : 'z-scores against the reference library, one column per second'}
         </p>
       </div>
-      <div className="grid grid-cols-[minmax(6.5rem,9rem)_1fr] gap-x-3">
+      <div className="grid grid-cols-[6.75rem_1fr] gap-x-3 sm:grid-cols-[9rem_1fr]">
         <div className="flex flex-col text-xs" style={{ paddingTop: top }}>
           {systems.map((system) => (
             <div
@@ -200,7 +223,7 @@ export function SystemTimeline({
             />
           </div>
           <div className="relative mt-1 h-4 text-[0.68rem] text-muted-foreground" aria-hidden>
-            {timeTicks(duration).map((t) => (
+            {timeTicks(duration, tickBudget).map((t) => (
               <span
                 key={t}
                 className="absolute -translate-x-1/2 font-mono first:translate-x-0 last:-translate-x-full"

@@ -97,10 +97,13 @@ export function MediaPlayer({
   const url = mediaUrls.media(source)
 
   if (kind === 'video') {
+    // Ads often open on black; the first scene's keyframe shows what's coming.
+    const opening = result.scenes.find((scene) => scene.keyframe)
     return (
       <video
         ref={setElement}
         src={url}
+        poster={opening ? mediaUrls.keyframe(source, opening.index) : undefined}
         controls
         playsInline
         preload="metadata"

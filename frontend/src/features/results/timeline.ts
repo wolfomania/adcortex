@@ -23,9 +23,9 @@ export function timeAtX(clientX: number, left: number, width: number, duration: 
 
 const TICK_STEPS = [1, 2, 5, 10, 15, 30, 60]
 
-/** Axis ticks in seconds: the smallest step that gives at most 10 intervals. */
-export function timeTicks(duration: number): number[] {
-  const step = TICK_STEPS.find((s) => duration / s <= 10) ?? 120
+/** Axis ticks in seconds: the smallest step that gives at most `maxIntervals`. */
+export function timeTicks(duration: number, maxIntervals = 10): number[] {
+  const step = TICK_STEPS.find((s) => duration / s <= maxIntervals) ?? 120
   const ticks: number[] = []
   for (let t = 0; t <= duration + 1e-9; t += step) {
     ticks.push(t)
