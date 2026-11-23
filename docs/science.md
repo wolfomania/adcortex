@@ -92,14 +92,32 @@ The 3D brain shows per-vertex z-scores, quantized to one byte per vertex per
 second: *z* = −3 + 6 · *b* / 255, so 128 is the average and values beyond
 ±3 SD are clipped (`analysis/frames.py`).
 
+**The bundled library** (`backend/src/adcortex/data/baseline_v1.json`) holds
+5 public-domain TV commercials from the Prelinger Archives, listed in
+`baseline/sources.yaml`:
+
+| Clip | Length | Source |
+|---|---|---|
+| Kodak Instamatic | 60 s | [archive.org/details/kodak_instamatic](https://archive.org/details/kodak_instamatic) |
+| Cheerios/V-8, 1960, black and white | 61 s | [archive.org/details/Cheerios1960](https://archive.org/details/Cheerios1960) |
+| AMC Jeep | 85 s | [archive.org/details/amc_jeep](https://archive.org/details/amc_jeep) |
+| Ivory Soap | 60 s | [archive.org/details/ivory_soap](https://archive.org/details/ivory_soap) |
+| Sharp ELSI-8 Calculator, 1970s | 61 s | [archive.org/details/sharp_calculator_2](https://archive.org/details/sharp_calculator_2) |
+
+Five clips make a coarse ruler. A reference percentile moves in steps of 20
+points, and decades-old commercials differ from current ads in pacing,
+picture, and sound. The reference clips are videos, so the Hook of an audio
+or script analysis, which averages only the non-visual systems, is ranked
+against Hooks that average all ten. Add your own ads to the library
+([how](deploy.md#reference-library)).
+
 **Without a reference library**, the app compares the clip with itself: each
 system and each vertex is z-scored against the clip's own mean and standard
 deviation. Peaks and dips stay meaningful, but every system's mean is zero by
 construction. Response index, Hook, Sustain, and the reference percentiles
 are then unavailable, and the systems are ranked by their strongest second
-instead. The repository does not ship a
-reference library yet; a deployment runs in this mode until one is added as
-`backend/src/adcortex/data/baseline_v1.json`.
+instead. This mode applies to the mock brain, whose curves have their own
+scale, and to a deployment without `baseline_v1.json`.
 
 ## Scores
 

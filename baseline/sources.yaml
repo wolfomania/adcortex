@@ -4,7 +4,7 @@
 # repository root), and its license. `start` and `end`, in seconds, cut a
 # segment from a longer file.
 version: v1
-description: 5 public-domain TV commercials from the Prelinger Archives
+description: 5 public-domain TV commercials from the Prelinger Archives, 60-85 s each.
 clips:
   - id: kodak_instamatic
     title: Kodak Instamatic Commercial

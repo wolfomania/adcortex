@@ -23,9 +23,9 @@ moments that stand out, and a written report with recommendations.
   medium, or low confidence.
 - **Scores against reference ads.** Response index, Hook (the first 3
   seconds), Sustain, and Peaks, plus each system's percentile among the
-  reference ads and among your own analyses. The scores need a reference
-  library, which the repository does not ship yet; without one, each clip is
-  compared with itself ([details](docs/science.md#comparing-with-reference-ads)).
+  reference ads and among your own analyses. The bundled reference library
+  holds 5 public-domain TV commercials; add your own ads to it
+  ([details](docs/science.md#comparing-with-reference-ads)).
 - **A timeline of moments.** A heatmap of every system over time, with peaks
   and dips marked under the scene thumbnails. Click anywhere to jump there.
 - **A written report from the model you choose.** Gemini, Claude, OpenAI, or
@@ -80,6 +80,8 @@ and for 10 idle minutes after. Once warm, it analyzes a 60 s video in about
 2.5 minutes. `ADCORTEX_GPU=L4 make deploy` picks a GPU that costs about half
 as much per hour and takes a little over 4 minutes
 ([benchmarks](docs/benchmarks.md)).
+`make baseline` rebuilds the reference library from `baseline/sources.yaml`
+([how](docs/deploy.md#reference-library)).
 See [docs/deploy.md](docs/deploy.md) for the details, costs, and operations.
 
 ## Configuration

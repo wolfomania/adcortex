@@ -17,10 +17,9 @@ import { computeScores, findMoments, referencePercentile, sceneStats, topSystems
 import { isApplicable, secondsGrid, systemCurves, type CurveOptions } from './signals'
 
 export const MOCK_BASELINE: BaselineRef = {
-  description:
-    '48 English-language video ads (15-60 s) from public ad libraries, run through the same pipeline.',
-  n_clips: 48,
-  version: '2026.11-mock',
+  description: '5 public-domain TV commercials from the Prelinger Archives, 60-85 s each.',
+  n_clips: 5,
+  version: 'v1',
 }
 
 /** Spread each sentence's words over its span in proportion to their length. */

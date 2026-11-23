@@ -80,6 +80,23 @@ takes the first type it has capacity for.
 `ADCORTEX_GPU_SNAPSHOT=1` restores the GPU worker from a GPU memory snapshot. Modal
 marks GPU snapshots as alpha.
 
+## Reference library
+
+The scores rank each analysis against the clips in `baseline/sources.yaml`.
+To change the library:
+
+1. Edit `baseline/sources.yaml`. Give each clip a `url` or a local `path`,
+   its license, and optional `start` and `end` seconds.
+2. Run `make baseline`. Clips without a cached prediction in
+   `.adcortex-data/baseline/` run on the deployed app, and the script writes
+   `backend/src/adcortex/data/baseline_v1.json`.
+3. Run `make deploy` to put the new library into use.
+
+Each clip that runs is an ordinary analysis: it costs GPU time, appears in
+History, and requests a report. To skip the reports, deploy from a copy of
+`.env` with `ADCORTEX_LLM_MODEL=` empty before step 2:
+`ADCORTEX_DEPLOY_ENV_FILE=path/to/copy make deploy`.
+
 ## Costs
 
 You pay for the GPU worker while it runs, including its 10 idle minutes:
