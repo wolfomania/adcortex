@@ -17,9 +17,10 @@ pipeline of `TribeModel.get_events_dataframe` with three changes:
    only; the rest use the multilingual `xx_sent_ud_sm` splitter. If text
    annotation still fails, the prediction uses video and audio features only.
 4. Speed. V-JEPA 2 runs under float16 autocast with its frames resized on the
-   GPU (`patch_video_model`), and float32 matrix products use TF32 tensor
-   cores (`allow_tensor_cores`). docs/benchmarks.md compares the predictions
-   with float32 ones.
+   GPU (`patch_video_model`), each frame is decoded once although its windows
+   overlap (`patch_frame_reader`), and float32 matrix products use TF32
+   tensor cores (`allow_tensor_cores`). docs/benchmarks.md compares the
+   predictions with float32 ones.
 
 The image provides tribev2 (commit af58661), the spaCy pipelines
 `en_core_web_lg` and `xx_sent_ud_sm`, ffmpeg 4-7 (torchcodec cannot load 8),
@@ -43,6 +44,7 @@ from typing import Any
 import numpy as np
 
 from neuromarketing.brain.base import TRIBE_NAME, BrainPrediction, BrainRequest
+from neuromarketing.brain.frames import FrameCache, cache_capacity, read_frame_at
 from neuromarketing.brain.transcript import (
     AudioChunk,
     PlacedWord,
@@ -67,6 +69,8 @@ _spacy_lock = threading.Lock()
 _spacy_patched = False
 _video_lock = threading.Lock()
 _video_patched = False
+_frames_lock = threading.Lock()
+_frames_patched = False
 
 
 def patch_spacy() -> None:
@@ -130,6 +134,30 @@ def patch_video_model() -> None:
         _video_patched = True
 
 
+def patch_frame_reader() -> None:
+    """Decode each video frame once, though the model's windows overlap.
+
+    neuralset reads frames through moviepy, which restarted ffmpeg for every
+    0.5 s step; `brain.frames` explains the cache that replaces this.
+    """
+    global _frames_patched
+    with _frames_lock:
+        if _frames_patched:
+            return
+        from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
+
+        original = FFMPEG_VideoReader.get_frame
+
+        def get_frame(self: Any, t: float) -> Any:
+            cache = self.__dict__.get("_nm_frames")
+            if cache is None:
+                cache = self._nm_frames = FrameCache(cache_capacity(self.fps))
+            return read_frame_at(self, t, cache, lambda at: original(self, at))
+
+        FFMPEG_VideoReader.get_frame = get_frame
+        _frames_patched = True
+
+
 class TribeBrain:
     name = TRIBE_NAME
 
@@ -163,6 +191,7 @@ class TribeBrain:
             if self._model is None:
                 patch_spacy()
                 patch_video_model()
+                patch_frame_reader()
                 allow_tensor_cores()
                 from tribev2.demo_utils import TribeModel
 
