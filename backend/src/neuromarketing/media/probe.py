@@ -69,10 +69,12 @@ def _media_info(data: dict[str, Any]) -> MediaInfo:
         None,
     )
     audio = next((s for s in streams if s.get("codec_type") == "audio"), None)
-    durations = [_float(fmt.get("duration"))] + [
-        _float(s.get("duration")) for s in streams
-    ]
-    duration = max((d for d in durations if d is not None), default=0.0)
+    # Only picture and sound set the length: a data track, such as the
+    # timecode of the recording a clip was cut from, can run for hours.
+    media = [s for s in streams if s is video or s.get("codec_type") == "audio"]
+    durations = [d for s in media if (d := _float(s.get("duration"))) is not None]
+    # WebM and Matroska give the duration only for the whole file.
+    duration = max(durations, default=_float(fmt.get("duration")) or 0.0)
     if duration <= 0 or (video is None and audio is None):
         raise MediaError(
             "We couldn't read this file. Is it a valid audio or video file?"

@@ -61,6 +61,48 @@ def test_probe_rejects_missing_file(tmp_path: Path) -> None:
         probe(tmp_path / "missing.mp4")
 
 
+def test_data_tracks_do_not_lengthen_the_clip() -> None:
+    # A cut from a long recording keeps its timecode track, hours long.
+    info = probe_mod._media_info(
+        {
+            "format": {"duration": "130.0", "format_name": "mov,mp4"},
+            "streams": [
+                {"codec_type": "video", "duration": "130.0", "width": 1280},
+                {"codec_type": "audio", "duration": "130.0"},
+                {"codec_type": "data", "duration": "7424.4"},
+            ],
+        }
+    )
+
+    assert info.duration_s == 130.0
+
+
+def test_streams_without_a_duration_fall_back_to_the_container() -> None:
+    # WebM and Matroska give the duration only for the whole file.
+    info = probe_mod._media_info(
+        {
+            "format": {"duration": "12.5", "format_name": "matroska,webm"},
+            "streams": [{"codec_type": "video"}, {"codec_type": "audio"}],
+        }
+    )
+
+    assert info.duration_s == 12.5
+
+
+def test_the_longest_of_picture_and_sound_sets_the_length() -> None:
+    info = probe_mod._media_info(
+        {
+            "format": {"duration": "10.0"},
+            "streams": [
+                {"codec_type": "video", "duration": "10.0"},
+                {"codec_type": "audio", "duration": "10.4"},
+            ],
+        }
+    )
+
+    assert info.duration_s == 10.4
+
+
 def test_parse_fps_handles_fractions_and_zero() -> None:
     assert probe_mod.parse_rate("30000/1001") == pytest.approx(29.97, abs=0.01)
     assert probe_mod.parse_rate("0/0") is None
