@@ -5,7 +5,7 @@
 Each clip is downloaded into .adcortex-data/baseline/ and cut to its `start`
 and `end`. Clips without a cached prediction run on the deployed app; their
 predictions are read from the app's Modal Volume and cached by file content.
-The output is backend/src/adcortex/data/baseline_v1.json.
+The output is backend/src/adcortex/data/baseline.json.
 
 Deploy with ADCORTEX_LLM_MODEL empty first: otherwise each new clip requests
 a report. Redeploy with .env afterwards to put the baseline into use.
@@ -35,7 +35,7 @@ from adcortex.brain.base import BrainPrediction
 ROOT = Path(__file__).resolve().parent.parent
 SOURCES = ROOT / "baseline" / "sources.yaml"
 CACHE = ROOT / ".adcortex-data" / "baseline"
-OUTPUT = ROOT / "backend" / "src" / "adcortex" / "data" / "baseline_v1.json"
+OUTPUT = ROOT / "backend" / "src" / "adcortex" / "data" / "baseline.json"
 APP = "adcortex"
 VOLUME = "adcortex-data"
 TIMEOUT_S = 1800.0

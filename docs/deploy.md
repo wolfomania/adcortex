@@ -92,7 +92,7 @@ To change the library:
    its license, and optional `start` and `end` seconds.
 2. Run `make baseline`. Clips without a cached prediction in
    `.adcortex-data/baseline/` run on the deployed app, and the script writes
-   `backend/src/adcortex/data/baseline_v1.json`.
+   `backend/src/adcortex/data/baseline.json`.
 3. Run `make deploy` to put the new library into use.
 
 Each clip that runs is an ordinary analysis: it costs GPU time, appears in

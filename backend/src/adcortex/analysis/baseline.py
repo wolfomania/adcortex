@@ -95,7 +95,7 @@ def percentile_of(value: float, samples: Sequence[float]) -> float | None:
 
 
 def _default_path() -> Path:
-    return Path(str(resources.files("adcortex.data") / "baseline_v1.json"))
+    return Path(str(resources.files("adcortex.data") / "baseline.json"))
 
 
 @lru_cache(maxsize=4)

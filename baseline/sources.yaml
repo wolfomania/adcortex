@@ -1,4 +1,4 @@
-# Reference clips for backend/src/adcortex/data/baseline_v1.json.
+# Reference clips for backend/src/adcortex/data/baseline.json.
 # `make baseline` analyzes each clip on the deployed app and pools the
 # predictions. Each clip needs a `url` or a local `path` (relative to the
 # repository root), and its license. `start` and `end`, in seconds, cut a

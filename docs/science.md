@@ -98,7 +98,7 @@ The 3D brain shows per-vertex z-scores, quantized to one byte per vertex per
 second: *z* = −3 + 6 · *b* / 255, so 128 is the average and values beyond
 ±3 SD are clipped (`analysis/frames.py`).
 
-**The bundled library** (`backend/src/adcortex/data/baseline_v1.json`) holds
+**The bundled library** (`backend/src/adcortex/data/baseline.json`) holds
 5 public-domain TV commercials from the Prelinger Archives, listed in
 `baseline/sources.yaml`:
 
@@ -123,7 +123,7 @@ deviation. Peaks and dips stay meaningful, but every system's mean is zero by
 construction. Response index, Hook, Sustain, and the reference percentiles
 are then unavailable, and the systems are ranked by their strongest second
 instead. This mode applies to the mock brain, whose curves have their own
-scale, and to a deployment without `baseline_v1.json`.
+scale, and to a deployment without `baseline.json`.
 
 ## Scores
 
