@@ -17,6 +17,7 @@ from pydantic_ai import (
     RunContext,
 )
 from pydantic_ai.exceptions import (
+    FallbackExceptionGroup,
     ModelAuthenticationError,
     ModelNotFoundError,
     ModelRequestRejectedError,
@@ -38,6 +39,7 @@ from adcortex.llm.client import (
     OutputMode,
     Sleep,
     call_with_backoff,
+    failures,
 )
 from adcortex.llm.prompts import REPORT_INSTRUCTIONS, report_brief
 
@@ -74,17 +76,16 @@ class ReportDeps:
 
 def choose_input_mode(config: LlmConfig, request: ReportRequest) -> LlmInputMode:
     """The richest input the settings allow and the model accepts."""
-    profile = config.model.profile
     media = request.media
     if config.media == "video":
-        if _fits(media.video) and profile.get("supports_video_input", True):
+        if _fits(media.video) and config.supports("supports_video_input"):
             return "video"
-        if _fits(media.audio) and profile.get("supports_audio_file_input", True):
+        if _fits(media.audio) and config.supports("supports_audio_file_input"):
             return "audio"
     if (
         config.media != "text"
         and media.keyframes
-        and profile.get("supports_image_input", True)
+        and config.supports("supports_image_input")
     ):
         return "keyframes"
     return "text"
@@ -115,9 +116,9 @@ async def write_report(
     for position, mode in enumerate(modes):
         try:
             return await _write(config, request, catalog, mode, sleep)
-        except ModelRequestRejectedError as exc:
+        except (ModelRequestRejectedError, FallbackExceptionGroup) as exc:
             final = position == len(modes) - 1
-            if final or isinstance(exc, ModelAuthenticationError | ModelNotFoundError):
+            if final or not _rejected_input(exc):
                 raise
             logger.warning(
                 "Report model rejected %s input (%s); trying %s",
@@ -126,6 +127,15 @@ async def write_report(
                 modes[position + 1],
             )
     raise AssertionError("unreachable")  # pragma: no cover
+
+
+def _rejected_input(exc: BaseException) -> bool:
+    """Whether a model refused the input itself, so a smaller input may work."""
+    return any(
+        isinstance(e, ModelRequestRejectedError)
+        and not isinstance(e, ModelAuthenticationError | ModelNotFoundError)
+        for e in failures(exc)
+    )
 
 
 async def _write(
@@ -152,7 +162,11 @@ async def _write(
         retries=config.retries,
         sleep=sleep,
     )
-    return StoredReport(model=config.model_name, input_mode=mode, report=run.output)
+    return StoredReport(
+        model=config.answered_by(run.response.model_name),
+        input_mode=mode,
+        report=run.output,
+    )
 
 
 def build_prompt(

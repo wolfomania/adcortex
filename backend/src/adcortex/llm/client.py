@@ -6,6 +6,9 @@
 Each provider reads its key from its standard variable (`GOOGLE_API_KEY`,
 `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, ...), so switching providers is a
 configuration change only.
+
+A comma-separated list sets fallbacks: when a model returns an API error, such
+as 503 under high demand, the next model in the list answers the same request.
 """
 
 from __future__ import annotations
@@ -13,12 +16,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import threading
-from collections.abc import Awaitable, Callable, Coroutine
+from collections.abc import Awaitable, Callable, Coroutine, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
 from pydantic_ai.exceptions import (
     ContentFilterError,
+    FallbackExceptionGroup,
     ModelAuthenticationError,
     ModelConnectionError,
     ModelContextWindowExceededError,
@@ -35,6 +39,7 @@ from pydantic_ai.exceptions import (
     UserError,
 )
 from pydantic_ai.models import Model, infer_model
+from pydantic_ai.models.fallback import FallbackModel
 from pydantic_ai.settings import ModelSettings
 from pydantic_ai.usage import UsageLimits
 
@@ -103,18 +108,32 @@ FAILURES: tuple[tuple[ErrorTypes, str], ...] = (
 
 @dataclass(frozen=True)
 class LlmConfig:
+    """The report model, or a fallback chain of them, and how to call it.
+
+    `chain` holds each configured name and model in fallback order. `model`
+    is the only model, or a FallbackModel over the chain.
+    """
+
     model: Model
     model_name: str
     media: MediaLevel
     output_mode: OutputMode
     retries: int
     model_settings: ModelSettings
+    chain: tuple[tuple[str, Model], ...]
 
     @classmethod
     def from_model(cls, model: Model, name: str, settings: Settings) -> LlmConfig:
+        return cls.from_models([(name, model)], settings)
+
+    @classmethod
+    def from_models(
+        cls, chain: Sequence[tuple[str, Model]], settings: Settings
+    ) -> LlmConfig:
+        models = [model for _, model in chain]
         return cls(
-            model=model,
-            model_name=name,
+            model=models[0] if len(models) == 1 else FallbackModel(*models),
+            model_name=", ".join(name for name, _ in chain),
             media=settings.llm_media,
             output_mode=settings.llm_output_mode,
             retries=settings.llm_retries,
@@ -123,7 +142,21 @@ class LlmConfig:
             model_settings=ModelSettings(
                 request_timeout=settings.llm_timeout_s, max_retries=0
             ),
+            chain=tuple(chain),
         )
+
+    def supports(self, feature: str) -> bool:
+        """Whether every model in the chain accepts an input, such as video."""
+        return all(model.profile.get(feature, True) for _, model in self.chain)
+
+    def answered_by(self, response_model: str | None) -> str:
+        """The configured name of the model that wrote a response."""
+        matches = [
+            (len(model.model_name), name)
+            for name, model in self.chain
+            if response_model and response_model.startswith(model.model_name)
+        ]
+        return max(matches)[1] if matches else self.model_name
 
 
 def load_llm(settings: Settings) -> LlmConfig | None:
@@ -134,14 +167,19 @@ def load_llm(settings: Settings) -> LlmConfig | None:
     """
     if not settings.llm_enabled:
         return None
-    name = (settings.llm_model or "").strip()
+    names = [name.strip() for name in (settings.llm_model or "").split(",")]
+    return LlmConfig.from_models(
+        [(name, _infer(name)) for name in names if name], settings
+    )
+
+
+def _infer(name: str) -> Model:
     try:
-        model = infer_model(name)
+        return infer_model(name)
     except (UserError, ValueError) as exc:
         raise ConfigurationError(
             f"ADCORTEX_LLM_MODEL={name!r} can't be used: {exc}"
         ) from exc
-    return LlmConfig.from_model(model, name, settings)
 
 
 def backoff_delay(attempt: int, retry_after: float | None) -> float:
@@ -149,21 +187,30 @@ def backoff_delay(attempt: int, retry_after: float | None) -> float:
     return min(MAX_BACKOFF_S, max(retry_after or 0.0, BASE_BACKOFF_S * 2.0**attempt))
 
 
+def failures(exc: BaseException) -> tuple[BaseException, ...]:
+    """The errors behind a failed call: one per model when a fallback chain failed."""
+    if isinstance(exc, FallbackExceptionGroup):
+        return tuple(exc.exceptions)
+    return (exc,)
+
+
 async def call_with_backoff[T](
     run: Callable[[], Awaitable[T]], *, retries: int, sleep: Sleep = asyncio.sleep
 ) -> T:
+    """Run, and run again after a wait while any model failed for a passing reason."""
     attempt = 0
     while True:
         try:
             return await run()
-        except RETRYABLE as exc:
-            if attempt >= retries:
+        except (*RETRYABLE, FallbackExceptionGroup) as exc:
+            passing = [e for e in failures(exc) if isinstance(e, RETRYABLE)]
+            if not passing or attempt >= retries:
                 raise
-            delay = backoff_delay(attempt, exc.retry_after)
+            delay = backoff_delay(attempt, max(e.retry_after or 0.0 for e in passing))
             logger.warning(
                 "Report model %s: %s; retrying in %.0f s",
-                exc.model_name,
-                type(exc).__name__,
+                ", ".join(e.model_name for e in passing),
+                ", ".join(type(e).__name__ for e in passing),
                 delay,
             )
             await sleep(delay)
@@ -173,9 +220,13 @@ async def call_with_backoff[T](
 def describe_failure(
     exc: BaseException, *, fallback: str = "Writing the report failed."
 ) -> str:
-    """A message for the person using the app; details go to the logs."""
+    """A message for the person using the app; details go to the logs.
+
+    A failed fallback chain is described by the first model's error.
+    """
+    first = failures(exc)[0]
     for types, message in FAILURES:
-        if isinstance(exc, types):
+        if isinstance(first, types):
             return message
     return fallback
 

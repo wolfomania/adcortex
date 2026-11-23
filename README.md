@@ -89,7 +89,7 @@ optional except `HF_TOKEN` for a Modal deployment.
 
 | Setting | Default | What it does |
 |---|---|---|
-| `ADCORTEX_LLM_MODEL` | none | The report model, such as `google:gemini-4-hydrogen` or `anthropic:claude-opus-5-5`. Empty: no written reports. |
+| `ADCORTEX_LLM_MODEL` | none | The report model, such as `google:gemini-4-hydrogen` or `anthropic:claude-opus-5-5`. A comma-separated list adds fallbacks: when a model returns an error, such as 503 under high demand, the next one answers. Empty: no written reports. |
 | `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` | none | The key for the provider in `ADCORTEX_LLM_MODEL`. |
 | `ADCORTEX_LLM_MEDIA` | `video` | What the report model sees besides the metrics: `video` (the clip, when the model accepts it), `keyframes` (up to 16 scene frames), or `text` (nothing else). |
 | `ADCORTEX_LLM_OUTPUT_MODE` | `tool` | How the model returns the report: `tool`, `native`, or `prompted`. |

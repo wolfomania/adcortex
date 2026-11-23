@@ -10,11 +10,13 @@ import numpy as np
 import pytest
 from pydantic_ai import BinaryContent
 from pydantic_ai.exceptions import (
+    FallbackExceptionGroup,
     ModelAuthenticationError,
     ModelQuotaExceededError,
     ModelRateLimitError,
     ModelRequestRejectedError,
     ModelServerError,
+    ModelUnavailableError,
 )
 from pydantic_ai.messages import (
     ModelMessage,
@@ -25,6 +27,7 @@ from pydantic_ai.messages import (
     ToolCallPart,
     ToolReturnPart,
 )
+from pydantic_ai.models.fallback import FallbackModel
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
 
@@ -176,6 +179,29 @@ def test_switching_provider_is_configuration_only(
     assert config.model.system == "anthropic"
 
 
+def test_a_list_of_models_falls_back_in_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("GOOGLE_API_KEY", "test-key")
+
+    config = load_llm(Settings(llm_model="google:gemini-a, google:gemini-b"))
+
+    assert config is not None
+    assert isinstance(config.model, FallbackModel)
+    assert [name for name, _ in config.chain] == ["google:gemini-a", "google:gemini-b"]
+    assert config.model_name == "google:gemini-a, google:gemini-b"
+
+
+def test_every_model_in_the_list_needs_its_key_at_start_up(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
+    with pytest.raises(ConfigurationError, match="GOOGLE_API_KEY"):
+        load_llm(Settings(llm_model="test, google:gemini-b"))
+
+
 # ── input selection ────────────────────────────────────────────────────────
 
 
@@ -189,6 +215,15 @@ def test_keyframes_replace_video_for_models_without_video_input() -> None:
     )
 
     assert choose_input_mode(_config(model), _request()) == "keyframes"
+
+
+def test_video_goes_to_a_list_of_models_only_when_all_accept_it() -> None:
+    blind = FunctionModel(
+        replying(lambda _: report_args()), profile={"supports_video_input": False}
+    )
+    config = LlmConfig.from_models([("a", TestModel()), ("b", blind)], Settings())
+
+    assert choose_input_mode(config, _request()) == "keyframes"
 
 
 def test_media_setting_limits_what_is_sent() -> None:
@@ -584,3 +619,99 @@ def test_errors_from_sync_model_calls_propagate() -> None:
 
     with pytest.raises(ValueError, match="bad output"):
         run_sync(fail())
+
+
+# ── fallback models ────────────────────────────────────────────────────────
+
+
+def _failing(
+    name: str, error: type[Exception], calls: list[str], failures: int = 99
+) -> FunctionModel:
+    """A model that raises `error` on its first `failures` calls, then reports."""
+
+    def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
+        calls.append(name)
+        if calls.count(name) <= failures:
+            raise error(name, "failed")
+        return ModelResponse(
+            parts=[ToolCallPart(info.output_tools[0].name, report_args())]
+        )
+
+    return FunctionModel(respond, model_name=name)
+
+
+async def test_the_next_model_writes_the_report_when_the_first_is_unavailable() -> None:
+    calls: list[str] = []
+    config = LlmConfig.from_models(
+        [
+            ("google:busy", _failing("busy", ModelUnavailableError, calls)),
+            ("google:spare", _failing("spare", ModelUnavailableError, calls, 0)),
+        ],
+        Settings(),
+    )
+
+    stored = await write_report(config, _request(), catalog=CATALOG, sleep=_no_sleep)
+
+    assert calls == ["busy", "spare"]
+    assert stored.model == "google:spare"
+
+
+async def test_a_list_unavailable_everywhere_is_retried_after_a_wait() -> None:
+    calls: list[str] = []
+    waits: list[float] = []
+
+    async def record(seconds: float) -> None:
+        waits.append(seconds)
+
+    config = LlmConfig.from_models(
+        [
+            ("google:a", _failing("a", ModelUnavailableError, calls, 1)),
+            ("google:b", _failing("b", ModelUnavailableError, calls)),
+        ],
+        Settings(),
+    )
+
+    stored = await write_report(config, _request(), catalog=CATALOG, sleep=record)
+
+    assert calls == ["a", "b", "a"]
+    assert waits == [5.0]
+    assert stored.model == "google:a"
+
+
+async def test_a_failed_list_is_described_by_the_first_models_error() -> None:
+    calls: list[str] = []
+    config = LlmConfig.from_models(
+        [
+            ("google:a", _failing("a", ModelUnavailableError, calls)),
+            ("google:b", _failing("b", ModelAuthenticationError, calls)),
+        ],
+        Settings(llm_retries=0),
+    )
+
+    with pytest.raises(FallbackExceptionGroup) as caught:
+        await write_report(config, _request(), catalog=CATALOG, sleep=_no_sleep)
+
+    assert calls == ["a", "b"]
+    assert describe_failure(caught.value) == describe_failure(
+        ModelUnavailableError("a", "failed")
+    )
+
+
+async def test_a_list_that_rejects_the_video_gets_keyframes() -> None:
+    def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
+        if any(
+            isinstance(p, BinaryContent) and p.media_type == "video/mp4"
+            for p in user_parts(messages)
+        ):
+            raise ModelRequestRejectedError("fn", "video too long")
+        return ModelResponse(
+            parts=[ToolCallPart(info.output_tools[0].name, report_args())]
+        )
+
+    config = LlmConfig.from_models(
+        [("a", FunctionModel(respond)), ("b", FunctionModel(respond))], Settings()
+    )
+
+    stored = await write_report(config, _request(), catalog=CATALOG)
+
+    assert stored.input_mode == "keyframes"

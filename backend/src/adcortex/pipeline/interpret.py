@@ -82,7 +82,7 @@ def interpret(
             LlmInfo(model=config.model_name, status="failed", error=error)
         )
     services.repo.save_report(meta.id, stored)
-    info = LlmInfo(model=config.model_name, status="ok", input_mode=stored.input_mode)
+    info = LlmInfo(model=stored.model, status="ok", input_mode=stored.input_mode)
     return Interpreted(info, stored)
 
 

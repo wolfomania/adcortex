@@ -49,7 +49,10 @@ async def write_comparison(
         sleep=sleep,
     )
     return StoredComparison(
-        a_id=a[0].id, b_id=b[0].id, model=config.model_name, report=run.output
+        a_id=a[0].id,
+        b_id=b[0].id,
+        model=config.answered_by(run.response.model_name),
+        report=run.output,
     )
 
 
