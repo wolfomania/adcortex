@@ -78,7 +78,8 @@ builds the images; later deploys reuse both. The GPU worker, an L40S by
 default ($2.46 per hour with its CPU and RAM), runs only while there is work
 and for 10 idle minutes after. Once warm, it analyzes a 60 s video in about
 2.5 minutes. `ADCORTEX_GPU=L4 make deploy` picks a GPU that costs about half
-as much per hour and takes about 4.5 minutes ([benchmarks](docs/benchmarks.md)).
+as much per hour and takes a little over 4 minutes
+([benchmarks](docs/benchmarks.md)).
 See [docs/deploy.md](docs/deploy.md) for the details, costs, and operations.
 
 ## Configuration
