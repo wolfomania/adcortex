@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any, BinaryIO
 
+from modal.exception import NotFoundError
+
 FILE = 1
 DIRECTORY = 2
 
@@ -64,7 +66,8 @@ class FakeVolume:
                 kind = DIRECTORY if tail else FILE
                 children[child] = FakeEntry(child, kind, size=0 if tail else len(data))
         if not children:
-            raise FileNotFoundError(path)
+            # As the real Volume does: Modal's error, not FileNotFoundError.
+            raise NotFoundError(f'path "/{path}" does not exist')
         # The real listing has no defined order.
         return sorted(children.values(), key=lambda e: e.path, reverse=True)
 

@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any, BinaryIO, Protocol
 
+from modal.exception import NotFoundError
 from pydantic import ValidationError
 
 from neuromarketing.domain.models import Progress
@@ -36,6 +37,9 @@ READ_WORKERS = 16
 CACHE_BYTES = 4 * 1024**3
 # A cached file used this recently may still be streaming; never evict it.
 CACHE_GRACE_S = 300.0
+# A missing path: `Volume.listdir` raises Modal's NotFoundError, while the
+# file calls raise FileNotFoundError.
+MISSING = (FileNotFoundError, NotFoundError)
 
 
 class VolumeUpload(Protocol):
@@ -88,7 +92,7 @@ class ModalVolumeStore:
         def read(path: str) -> bytes | None:
             try:
                 return self.read_bytes(path)
-            except FileNotFoundError:
+            except MISSING:
                 return None
 
         if len(paths) <= 1:
@@ -122,7 +126,7 @@ class ModalVolumeStore:
         base = clean_path(path)
         try:
             entries = self.volume.listdir(base)
-        except FileNotFoundError:
+        except MISSING:
             return []
         names: set[str] = set()
         for entry in entries:
@@ -137,11 +141,11 @@ class ModalVolumeStore:
     def exists(self, path: str) -> bool:
         try:
             return bool(self.volume.listdir(clean_path(path)))
-        except FileNotFoundError:
+        except MISSING:
             return False
 
     def remove(self, path: str) -> None:
-        with contextlib.suppress(FileNotFoundError):
+        with contextlib.suppress(*MISSING):
             self.volume.remove_file(clean_path(path), recursive=True)
 
 
