@@ -89,7 +89,9 @@ The scores rank each analysis against the clips in `baseline/sources.yaml`.
 To change the library:
 
 1. Edit `baseline/sources.yaml`. Give each clip a `url` or a local `path`,
-   its license, and optional `start` and `end` seconds.
+   its license, and optional `start` and `end` seconds. Use clips with
+   sound: an Instagram post whose music Instagram mutes for licensing
+   downloads silent.
 2. Run `make baseline`. Clips without a cached prediction in
    `.adcortex-data/baseline/` run on the deployed app, and the script writes
    `backend/src/adcortex/data/baseline.json`.

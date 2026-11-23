@@ -99,22 +99,28 @@ second: *z* = −3 + 6 · *b* / 255, so 128 is the average and values beyond
 ±3 SD are clipped (`analysis/frames.py`).
 
 **The bundled library** (`backend/src/adcortex/data/baseline.json`) holds
-5 public-domain TV commercials from the Prelinger Archives, listed in
-`baseline/sources.yaml`:
+9 Instagram posts with sound, listed in `baseline/sources.yaml`. It stores
+only statistics of their predictions; the videos are not redistributed.
 
-| Clip | Length | Source |
+| Account | Length | Post |
 |---|---|---|
-| Kodak Instamatic | 60 s | [archive.org/details/kodak_instamatic](https://archive.org/details/kodak_instamatic) |
-| Cheerios/V-8, 1960, black and white | 61 s | [archive.org/details/Cheerios1960](https://archive.org/details/Cheerios1960) |
-| AMC Jeep | 85 s | [archive.org/details/amc_jeep](https://archive.org/details/amc_jeep) |
-| Ivory Soap | 60 s | [archive.org/details/ivory_soap](https://archive.org/details/ivory_soap) |
-| Sharp ELSI-8 Calculator, 1970s | 61 s | [archive.org/details/sharp_calculator_2](https://archive.org/details/sharp_calculator_2) |
+| @larkin.life | 103 s | [DfcN7MlKm4a](https://www.instagram.com/p/DfcN7MlKm4a/) |
+| @knightfamilycontent | 44 s | [DfQLY5hsJH-](https://www.instagram.com/p/DfQLY5hsJH-/) |
+| @tete.au.carre | 27 s | [DdRjGKkolyE](https://www.instagram.com/p/DdRjGKkolyE/) |
+| @kepka_aktobe | 15 s | [DcgewBEqFh0](https://www.instagram.com/p/DcgewBEqFh0/) |
+| @maksim_titov_ls | 117 s | [DdLprVex-Ja](https://www.instagram.com/p/DdLprVex-Ja/) |
+| @buninsergey | 36 s | [Da8emfxsSmI](https://www.instagram.com/p/Da8emfxsSmI/) |
+| @shdbyzdn | 12 s | [DayG-iBN6RL](https://www.instagram.com/p/DayG-iBN6RL/) |
+| @single.fate | 45 s | [Dam4lNhBOoH](https://www.instagram.com/p/Dam4lNhBOoH/) |
+| @thauravault | 17 s | [DaTJkavo5VT](https://www.instagram.com/p/DaTJkavo5VT/) |
 
-Five clips make a coarse ruler. A reference percentile moves in steps of 20
-points, and decades-old commercials differ from current ads in pacing,
-picture, and sound. The reference clips are videos, so the Hook of an audio
-or script analysis, which averages only the non-visual systems, is ranked
-against Hooks that average all ten. Add your own ads to the library
+Nine clips make a coarse ruler: a reference percentile moves in steps of
+about 11 points. The per-second means and SDs pool every second, so the two
+clips longer than 100 s supply over half of them. Every clip has sound,
+because the Sound and Speech & language systems respond to audio. The
+reference clips are videos, so the Hook of an audio or script analysis,
+which averages only the non-visual systems, is ranked against Hooks that
+average all ten. Add your own ads to the library
 ([how](deploy.md#reference-library)).
 
 **Without a reference library**, the app compares the clip with itself: each

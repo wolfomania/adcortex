@@ -24,7 +24,7 @@ moments that stand out, and a written report with recommendations.
 - **Scores against reference ads.** Response index, Hook (the first 3
   seconds), Sustain, and Peaks, plus each system's percentile among the
   reference ads and among your own analyses. The bundled reference library
-  holds 5 public-domain TV commercials; add your own ads to it
+  holds 9 Instagram posts; add your own ads to it
   ([details](docs/science.md#comparing-with-reference-ads)).
 - **A timeline of moments.** A heatmap of every system over time, with peaks
   and dips marked under the scene thumbnails. Click anywhere to jump there.

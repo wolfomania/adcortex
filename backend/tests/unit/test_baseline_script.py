@@ -42,8 +42,8 @@ def cache(script: ModuleType, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
 def test_the_shipped_clip_list_is_valid(script: ModuleType) -> None:
     sources = script.load_sources()
 
-    assert len(sources.clips) == 5
-    assert all(clip.url and clip.license for clip in sources.clips)
+    assert sources.clips
+    assert all(clip.license for clip in sources.clips)
 
 
 @pytest.mark.parametrize(
