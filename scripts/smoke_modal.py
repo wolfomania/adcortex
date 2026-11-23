@@ -94,13 +94,7 @@ def _report_problems(
 ) -> list[str]:
     times = [k["t"] for k in report["key_moments"]]
     times += [r["t"] for r in report["recommendations"] if r.get("t") is not None]
-    scenes = {scene["index"] for scene in result["scenes"]}
-    unknown = [
-        f"the report names scene {note['scene_index']}, which does not exist"
-        for note in report["scene_notes"]
-        if note["scene_index"] not in scenes
-    ]
-    return _outside("report time", times, duration) + unknown
+    return _outside("report time", times, duration)
 
 
 def _outside(what: str, times: Iterable[float], duration: float) -> list[str]:

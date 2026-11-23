@@ -100,12 +100,10 @@ function writtenReport(stored: StoredReport | null): string {
     return section('Report', '<p class="note">This analysis has no written report.</p>')
   }
   const { report } = stored
-  const list = (items: readonly string[]) =>
-    `<ul>${items.map((item) => `<li>${e(item)}</li>`).join('')}</ul>`
   const moments = timedList(
     report.key_moments.map((moment) => ({
       t: moment.t,
-      body: `<p class="strong">${e(moment.title)}</p><p>${e(moment.what_happens)}</p><p>${e(moment.brain_response)}</p><p class="note">${e(moment.why_it_matters)}</p>`,
+      body: `<p class="strong">${e(moment.title)}</p><p>${e(moment.what_happens)}</p><p>${e(moment.brain_response)}</p>`,
     })),
   )
   const recommendations = timedList(
@@ -117,8 +115,6 @@ function writtenReport(stored: StoredReport | null): string {
   return section(
     'Report',
     `<p class="headline">${e(report.headline)}</p>
-<p>${e(report.summary)}</p>
-<div class="columns"><div><h3>Strengths</h3>${list(report.strengths)}</div><div><h3>Risks</h3>${list(report.risks)}</div></div>
 ${report.key_moments.length ? `<h3>Key moments</h3>${moments}` : ''}
 ${report.recommendations.length ? `<h3>Recommendations</h3>${recommendations}` : ''}
 <p class="note">Written by ${e(stored.model)} from the metrics above.</p>`,
@@ -260,7 +256,6 @@ p { margin: 0 0 6px; }
 .card p { font-size: 12px; color: var(--muted); margin: 0; }
 .value { font: 600 28px/1 var(--mono); }
 .unit { font-size: 13px; color: var(--muted); margin-left: 4px; }
-.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 ul { margin: 0; padding-left: 18px; }
 li { margin-bottom: 4px; }
 .timed { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -283,7 +278,7 @@ thead th { font-size: 12px; font-weight: 500; color: var(--muted); }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
 @media (max-width: 640px) {
   .cards, .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .columns, .pictures { grid-template-columns: 1fr; }
+  .pictures { grid-template-columns: 1fr; }
 }
 @media print {
   main { padding: 0; }

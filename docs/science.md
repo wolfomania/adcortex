@@ -141,13 +141,13 @@ accepts (`llm/report.py`):
 - With `keyframes`, up to 16 scene keyframes.
 - With `text`, the metrics only.
 
-Its instructions tell it that the numbers are predictions for an average
-viewer, to ground every claim in the numbers or in what is on screen, to keep
-every time inside the clip, to treat low-confidence systems as tentative, and
-never to claim to measure emotions, preference, or purchase intent. The output
-is a typed object: headline, summary, strengths, risks, key moments, and
-recommendations. A time outside the clip or an unknown scene sends the report
-back to the model to correct.
+Its instructions tell it to cite the systems and z-scores of the brief, to tie
+each response to what is on screen or said, to mark low-confidence systems, to
+keep every time inside the clip, to state each fact once, and never to claim to
+measure emotion, liking, or purchase intent. The output is a typed object with
+word limits: a one-sentence verdict, 3 to 5 key moments, and 2 to 4
+recommendations. A time outside the clip sends the report back to the model to
+correct.
 
 ## Limitations
 

@@ -85,10 +85,7 @@ export function ComparisonReportPanel({
     const { report, model } = state.data.comparison
     body = (
       <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-2">
-          <h3 className="text-xl font-semibold tracking-tight text-balance">{report.headline}</h3>
-          <p className="text-sm leading-relaxed text-pretty">{report.summary}</p>
-        </div>
+        <h3 className="text-xl font-semibold tracking-tight text-balance">{report.headline}</h3>
         <div className="grid gap-6 sm:grid-cols-2">
           <Strengths side="a" name={nameA} items={report.a_strengths} />
           <Strengths side="b" name={nameB} items={report.b_strengths} />

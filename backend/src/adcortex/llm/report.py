@@ -71,7 +71,6 @@ class ReportRequest:
 @dataclass(frozen=True)
 class ReportDeps:
     duration_s: float
-    scene_indices: frozenset[int]
 
 
 def choose_input_mode(config: LlmConfig, request: ReportRequest) -> LlmInputMode:
@@ -148,7 +147,6 @@ async def _write(
     agent = _agent(config.output_mode)
     deps = ReportDeps(
         duration_s=request.result.duration_s,
-        scene_indices=frozenset(s.index for s in request.result.scenes),
     )
     prompt = build_prompt(request, mode, catalog)
     run = await call_with_backoff(
@@ -208,10 +206,8 @@ def _sample(
     return [items[int(i * step)] for i in range(limit)]
 
 
-def check_report(
-    report: Report, *, duration_s: float, scene_indices: frozenset[int]
-) -> Report:
-    """Send impossible times and scene indices back to the model; sort moments."""
+def check_report(report: Report, *, duration_s: float) -> Report:
+    """Send impossible times back to the model; sort moments."""
     problems: list[str] = []
 
     def in_clip(t: float, where: str) -> float:
@@ -232,11 +228,6 @@ def check_report(
         else r.model_copy(update={"t": in_clip(r.t, f"recommendations[{i}].t")})
         for i, r in enumerate(report.recommendations)
     ]
-    problems += [
-        f"scene_notes[{i}].scene_index = {n.scene_index} is not in the scene list"
-        for i, n in enumerate(report.scene_notes)
-        if n.scene_index not in scene_indices
-    ]
     if problems:
         raise ModelRetry("Fix these fields: " + "; ".join(problems) + ".")
     return report.model_copy(
@@ -248,9 +239,7 @@ def check_report(
 
 
 def _validate(ctx: RunContext[ReportDeps], report: Report) -> Report:
-    return check_report(
-        report, duration_s=ctx.deps.duration_s, scene_indices=ctx.deps.scene_indices
-    )
+    return check_report(report, duration_s=ctx.deps.duration_s)
 
 
 def output_type(model: type[Any], mode: OutputMode) -> Any:

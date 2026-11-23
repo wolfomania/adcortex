@@ -81,18 +81,9 @@ def _report() -> StoredReport:
         created_at=CREATED,
         report=Report(
             headline="h",
-            summary="s",
             key_moments=[
-                KeyMoment(
-                    t=0,
-                    title="t",
-                    what_happens="w",
-                    brain_response="b",
-                    why_it_matters="y",
-                )
+                KeyMoment(t=0, title="t", what_happens="w", brain_response="b")
             ],
-            strengths=["s"],
-            risks=["r"],
             recommendations=[Recommendation(title="t", detail="d")],
         ),
     )
@@ -106,7 +97,6 @@ def _comparison(a_id: str, b_id: str) -> StoredComparison:
         created_at=CREATED,
         report=ComparisonReport(
             headline="h",
-            summary="s",
             a_strengths=["a"],
             b_strengths=["b"],
             recommendation="r",

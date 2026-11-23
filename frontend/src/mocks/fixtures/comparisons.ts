@@ -47,7 +47,6 @@ export function templateComparison(a: Side, b: Side): ComparisonReport {
     headline: close
       ? 'The two versions draw a similar overall response; they differ in which systems lead.'
       : `Version ${leader} draws the stronger overall response, by ${Math.round(gap)} percentile points.`,
-    summary: `Response index: ${Math.round(first)} for A and ${Math.round(second)} for B. The strengths list the systems where each version is clearly ahead. Differences of a few percentile points are within the noise of the prediction.`,
     a_strengths: strengths(a.result, b.result),
     b_strengths: strengths(b.result, a.result),
     recommendation: close

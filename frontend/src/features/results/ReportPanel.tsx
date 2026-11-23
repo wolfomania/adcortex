@@ -28,30 +28,10 @@ function TimeChip({ t }: { t: number }) {
   )
 }
 
-function List({ title, items }: { title: string; items: string[] }) {
-  return items.length ? (
-    <div className="flex flex-col gap-2">
-      <h4 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h4>
-      <ul className="flex list-disc flex-col gap-1.5 pl-4 text-sm">
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  ) : null
-}
-
 function ReportBody({ report }: { report: Report }) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h3 className="text-xl font-semibold tracking-tight text-balance">{report.headline}</h3>
-        <p className="text-sm leading-relaxed text-pretty">{report.summary}</p>
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2">
-        <List title="Strengths" items={report.strengths} />
-        <List title="Risks" items={report.risks} />
-      </div>
+      <h3 className="text-xl font-semibold tracking-tight text-balance">{report.headline}</h3>
       {report.key_moments.length ? (
         <div className="flex flex-col gap-3">
           <h4 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -65,7 +45,6 @@ function ReportBody({ report }: { report: Report }) {
                   <span className="font-medium">{moment.title}</span>
                   <span>{moment.what_happens}</span>
                   <span className="text-muted-foreground">{moment.brain_response}</span>
-                  <span className="text-muted-foreground">{moment.why_it_matters}</span>
                 </div>
               </li>
             ))}

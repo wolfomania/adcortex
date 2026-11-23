@@ -43,6 +43,7 @@ from adcortex.domain.models import (
     AnalysisResult,
     LanguageInfo,
     MediaKind,
+    Report,
     Scene,
     SourceFile,
     Word,
@@ -294,16 +295,6 @@ async def test_out_of_range_timestamps_are_sent_back_for_correction() -> None:
     assert "key_moments[0].t = 99 s is outside the clip" in str(part.content)
 
 
-async def test_unknown_scene_index_is_sent_back_for_correction() -> None:
-    model = FunctionModel(
-        replying(lambda call: report_args(scene_index=7 if call == 0 else 1))
-    )
-
-    stored = await write_report(_config(model), _request(), catalog=CATALOG)
-
-    assert [n.scene_index for n in stored.report.scene_notes] == [1]
-
-
 async def test_rejected_video_falls_back_to_keyframes() -> None:
     def respond(messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
         if any(
@@ -363,6 +354,22 @@ async def test_exhausted_quota_is_not_retried() -> None:
 
     assert attempts == 1
     assert "quota" in describe_failure(caught.value)
+
+
+def test_reports_stored_before_the_trim_still_load() -> None:
+    moment = report_args()["key_moments"][0] | {"why_it_matters": "Faces hold."}
+    stored = report_args() | {
+        "summary": "The face drives the response.",
+        "key_moments": [moment] * 7,
+        "scene_notes": [{"scene_index": 0, "note": "Opens on product."}],
+        "strengths": ["Strong face moment"],
+        "risks": ["Slow start"],
+    }
+
+    report = Report.model_validate(stored)
+
+    assert len(report.key_moments) == 7
+    assert set(report.model_dump()) == {"headline", "key_moments", "recommendations"}
 
 
 async def test_times_just_past_the_end_are_clamped_without_a_retry() -> None:

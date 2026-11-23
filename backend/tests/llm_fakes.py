@@ -15,22 +15,17 @@ from pydantic_ai.messages import (
 from pydantic_ai.models.function import AgentInfo
 
 
-def report_args(t: float = 5.0, scene_index: int = 0) -> dict[str, Any]:
+def report_args(t: float = 5.0) -> dict[str, Any]:
     return {
         "headline": "Faces land at 5 s.",
-        "summary": "The face at 5 s drives the strongest response.",
         "key_moments": [
             {
                 "t": t,
                 "title": "Face appears",
                 "what_happens": "A face fills the frame.",
                 "brain_response": "Faces +2 SD.",
-                "why_it_matters": "Faces hold attention.",
             }
         ],
-        "scene_notes": [{"scene_index": scene_index, "note": "Opens on product."}],
-        "strengths": ["Strong face moment"],
-        "risks": ["Slow start"],
         "recommendations": [
             {"title": "Show the face earlier", "detail": "Move it to 1 s.", "t": 1.0}
         ],
@@ -40,7 +35,6 @@ def report_args(t: float = 5.0, scene_index: int = 0) -> dict[str, Any]:
 def comparison_args(_: int = 0) -> dict[str, Any]:
     return {
         "headline": "B hooks faster.",
-        "summary": "B opens on a face.",
         "a_strengths": ["Clear product shot"],
         "b_strengths": ["Faster hook"],
         "recommendation": "Open with B's face, close with A's product.",

@@ -150,7 +150,7 @@ export interface AnalysisDetail {
    */
   report?: StoredReport | null
   /**
-   * Set once completed.
+   * Set once the metrics are ready: while the report is being written (`interpreting`) and once `completed`.
    */
   result?: AnalysisResult | null
 }
@@ -165,39 +165,31 @@ export interface StoredReport {
   report: Report
 }
 /**
+ * The headline gives the verdict, key moments the evidence, and
+ * recommendations the changes. Each fact appears once.
+ *
  * This interface was referenced by `ApiSchema`'s JSON-Schema
  * via the `definition` "Report".
  */
 export interface Report {
   /**
-   * One-sentence verdict, at most 20 words.
+   * The verdict in one sentence, at most 15 words.
    */
   headline: string
   /**
+   * 3 to 5 peaks or dips, in time order.
+   *
    * @minItems 1
    * @maxItems 8
    */
   key_moments: KeyMoment[]
   /**
+   * 2 to 4 changes, the most important first.
+   *
    * @minItems 1
    * @maxItems 6
    */
   recommendations: Recommendation[]
-  /**
-   * @minItems 1
-   * @maxItems 6
-   */
-  risks: string[]
-  scene_notes?: SceneNote[]
-  /**
-   * @minItems 1
-   * @maxItems 6
-   */
-  strengths: string[]
-  /**
-   * Executive summary, 3-5 sentences.
-   */
-  summary: string
 }
 /**
  * This interface was referenced by `ApiSchema`'s JSON-Schema
@@ -205,7 +197,7 @@ export interface Report {
  */
 export interface KeyMoment {
   /**
-   * Which brain systems respond and how, citing the metrics.
+   * The systems that respond, with z-scores, at most 15 words.
    */
   brain_response: string
   /**
@@ -213,40 +205,31 @@ export interface KeyMoment {
    */
   t: number
   /**
-   * Short label, at most 8 words.
+   * Label, at most 6 words.
    */
   title: string
   /**
-   * What the viewer sees or hears at t.
+   * What the viewer sees or hears at t, at most 15 words.
    */
   what_happens: string
-  /**
-   * Implication for the creative.
-   */
-  why_it_matters: string
 }
 /**
  * This interface was referenced by `ApiSchema`'s JSON-Schema
  * via the `definition` "Recommendation".
  */
 export interface Recommendation {
+  /**
+   * What to change and where, in one sentence of at most 25 words.
+   */
   detail: string
   /**
-   * Time in seconds the advice refers to, if any.
+   * Time in seconds the change applies to, if any.
    */
   t?: number | null
-  title: string
-}
-/**
- * This interface was referenced by `ApiSchema`'s JSON-Schema
- * via the `definition` "SceneNote".
- */
-export interface SceneNote {
-  note: string
   /**
-   * Index of the scene in the scene list.
+   * The change as an imperative, at most 6 words.
    */
-  scene_index: number
+  title: string
 }
 /**
  * This interface was referenced by `ApiSchema`'s JSON-Schema
@@ -437,32 +420,35 @@ export interface CompareRequest {
   b_id: string
 }
 /**
+ * The headline gives the verdict, the strengths the evidence, and the
+ * recommendation what to keep. Each fact appears once.
+ *
  * This interface was referenced by `ApiSchema`'s JSON-Schema
  * via the `definition` "ComparisonReport".
  */
 export interface ComparisonReport {
   /**
+   * 1 to 3 things A does better, each at most 20 words.
+   *
    * @minItems 1
    * @maxItems 5
    */
   a_strengths: string[]
   /**
+   * 1 to 3 things B does better, each at most 20 words.
+   *
    * @minItems 1
    * @maxItems 5
    */
   b_strengths: string[]
   /**
-   * One-sentence comparison, at most 20 words.
+   * Which ad works better, and where, in one sentence of at most 20 words.
    */
   headline: string
   /**
-   * Which elements to keep from each.
+   * What to keep from each ad, in at most 2 sentences.
    */
   recommendation: string
-  /**
-   * 3-5 sentences comparing A and B.
-   */
-  summary: string
 }
 /**
  * This interface was referenced by `ApiSchema`'s JSON-Schema

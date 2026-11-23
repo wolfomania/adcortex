@@ -55,7 +55,7 @@
             }
           ],
           "default": null,
-          "description": "Set once completed."
+          "description": "Set once the metrics are ready: while the report is being written (`interpreting`) and once `completed`."
         }
       },
       "required": [
@@ -541,8 +541,10 @@
       "type": "object"
     },
     "ComparisonReport": {
+      "description": "The headline gives the verdict, the strengths the evidence, and the\nrecommendation what to keep. Each fact appears once.",
       "properties": {
         "a_strengths": {
+          "description": "1 to 3 things A does better, each at most 20 words.",
           "items": {
             "type": "string"
           },
@@ -552,6 +554,7 @@
           "type": "array"
         },
         "b_strengths": {
+          "description": "1 to 3 things B does better, each at most 20 words.",
           "items": {
             "type": "string"
           },
@@ -561,24 +564,18 @@
           "type": "array"
         },
         "headline": {
-          "description": "One-sentence comparison, at most 20 words.",
+          "description": "Which ad works better, and where, in one sentence of at most 20 words.",
           "title": "Headline",
           "type": "string"
         },
         "recommendation": {
-          "description": "Which elements to keep from each.",
+          "description": "What to keep from each ad, in at most 2 sentences.",
           "title": "Recommendation",
-          "type": "string"
-        },
-        "summary": {
-          "description": "3-5 sentences comparing A and B.",
-          "title": "Summary",
           "type": "string"
         }
       },
       "required": [
         "headline",
-        "summary",
         "a_strengths",
         "b_strengths",
         "recommendation"
@@ -650,7 +647,7 @@
     "KeyMoment": {
       "properties": {
         "brain_response": {
-          "description": "Which brain systems respond and how, citing the metrics.",
+          "description": "The systems that respond, with z-scores, at most 15 words.",
           "title": "Brain Response",
           "type": "string"
         },
@@ -660,18 +657,13 @@
           "type": "number"
         },
         "title": {
-          "description": "Short label, at most 8 words.",
+          "description": "Label, at most 6 words.",
           "title": "Title",
           "type": "string"
         },
         "what_happens": {
-          "description": "What the viewer sees or hears at t.",
+          "description": "What the viewer sees or hears at t, at most 15 words.",
           "title": "What Happens",
-          "type": "string"
-        },
-        "why_it_matters": {
-          "description": "Implication for the creative.",
-          "title": "Why It Matters",
           "type": "string"
         }
       },
@@ -679,8 +671,7 @@
         "t",
         "title",
         "what_happens",
-        "brain_response",
-        "why_it_matters"
+        "brain_response"
       ],
       "title": "KeyMoment",
       "type": "object"
@@ -1056,6 +1047,7 @@
     "Recommendation": {
       "properties": {
         "detail": {
+          "description": "What to change and where, in one sentence of at most 25 words.",
           "title": "Detail",
           "type": "string"
         },
@@ -1069,10 +1061,11 @@
             }
           ],
           "default": null,
-          "description": "Time in seconds the advice refers to, if any.",
+          "description": "Time in seconds the change applies to, if any.",
           "title": "T"
         },
         "title": {
+          "description": "The change as an imperative, at most 6 words.",
           "title": "Title",
           "type": "string"
         }
@@ -1100,13 +1093,15 @@
       "type": "object"
     },
     "Report": {
+      "description": "The headline gives the verdict, key moments the evidence, and\nrecommendations the changes. Each fact appears once.",
       "properties": {
         "headline": {
-          "description": "One-sentence verdict, at most 20 words.",
+          "description": "The verdict in one sentence, at most 15 words.",
           "title": "Headline",
           "type": "string"
         },
         "key_moments": {
+          "description": "3 to 5 peaks or dips, in time order.",
           "items": {
             "$ref": "#/$defs/KeyMoment"
           },
@@ -1116,6 +1111,7 @@
           "type": "array"
         },
         "recommendations": {
+          "description": "2 to 4 changes, the most important first.",
           "items": {
             "$ref": "#/$defs/Recommendation"
           },
@@ -1123,44 +1119,11 @@
           "minItems": 1,
           "title": "Recommendations",
           "type": "array"
-        },
-        "risks": {
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 6,
-          "minItems": 1,
-          "title": "Risks",
-          "type": "array"
-        },
-        "scene_notes": {
-          "items": {
-            "$ref": "#/$defs/SceneNote"
-          },
-          "title": "Scene Notes",
-          "type": "array"
-        },
-        "strengths": {
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 6,
-          "minItems": 1,
-          "title": "Strengths",
-          "type": "array"
-        },
-        "summary": {
-          "description": "Executive summary, 3-5 sentences.",
-          "title": "Summary",
-          "type": "string"
         }
       },
       "required": [
         "headline",
-        "summary",
         "key_moments",
-        "strengths",
-        "risks",
         "recommendations"
       ],
       "title": "Report",
@@ -1202,25 +1165,6 @@
         "end"
       ],
       "title": "Scene",
-      "type": "object"
-    },
-    "SceneNote": {
-      "properties": {
-        "note": {
-          "title": "Note",
-          "type": "string"
-        },
-        "scene_index": {
-          "description": "Index of the scene in the scene list.",
-          "title": "Scene Index",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "scene_index",
-        "note"
-      ],
-      "title": "SceneNote",
       "type": "object"
     },
     "SceneStat": {

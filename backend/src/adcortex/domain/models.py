@@ -254,35 +254,39 @@ class AnalysisResult(Frozen):
 
 class KeyMoment(BaseModel):
     t: float = Field(description="Time in seconds from the start of the media.")
-    title: str = Field(description="Short label, at most 8 words.")
-    what_happens: str = Field(description="What the viewer sees or hears at t.")
-    brain_response: str = Field(
-        description="Which brain systems respond and how, citing the metrics."
+    title: str = Field(description="Label, at most 6 words.")
+    what_happens: str = Field(
+        description="What the viewer sees or hears at t, at most 15 words."
     )
-    why_it_matters: str = Field(description="Implication for the creative.")
-
-
-class SceneNote(BaseModel):
-    scene_index: int = Field(description="Index of the scene in the scene list.")
-    note: str
+    brain_response: str = Field(
+        description="The systems that respond, with z-scores, at most 15 words."
+    )
 
 
 class Recommendation(BaseModel):
-    title: str
-    detail: str
+    title: str = Field(description="The change as an imperative, at most 6 words.")
+    detail: str = Field(
+        description="What to change and where, in one sentence of at most 25 words."
+    )
     t: float | None = Field(
-        default=None, description="Time in seconds the advice refers to, if any."
+        default=None, description="Time in seconds the change applies to, if any."
     )
 
 
 class Report(BaseModel):
-    headline: str = Field(description="One-sentence verdict, at most 20 words.")
-    summary: str = Field(description="Executive summary, 3-5 sentences.")
-    key_moments: list[KeyMoment] = Field(min_length=1, max_length=8)
-    scene_notes: list[SceneNote] = Field(default_factory=list)
-    strengths: list[str] = Field(min_length=1, max_length=6)
-    risks: list[str] = Field(min_length=1, max_length=6)
-    recommendations: list[Recommendation] = Field(min_length=1, max_length=6)
+    """The headline gives the verdict, key moments the evidence, and
+    recommendations the changes. Each fact appears once."""
+
+    headline: str = Field(description="The verdict in one sentence, at most 15 words.")
+    # The limits admit reports written before 2026-11-23, with up to 8 moments.
+    key_moments: list[KeyMoment] = Field(
+        min_length=1, max_length=8, description="3 to 5 peaks or dips, in time order."
+    )
+    recommendations: list[Recommendation] = Field(
+        min_length=1,
+        max_length=6,
+        description="2 to 4 changes, the most important first.",
+    )
 
 
 class StoredReport(Frozen):
@@ -293,11 +297,26 @@ class StoredReport(Frozen):
 
 
 class ComparisonReport(BaseModel):
-    headline: str = Field(description="One-sentence comparison, at most 20 words.")
-    summary: str = Field(description="3-5 sentences comparing A and B.")
-    a_strengths: list[str] = Field(min_length=1, max_length=5)
-    b_strengths: list[str] = Field(min_length=1, max_length=5)
-    recommendation: str = Field(description="Which elements to keep from each.")
+    """The headline gives the verdict, the strengths the evidence, and the
+    recommendation what to keep. Each fact appears once."""
+
+    headline: str = Field(
+        description="Which ad works better, and where, in one sentence of at most "
+        "20 words."
+    )
+    a_strengths: list[str] = Field(
+        min_length=1,
+        max_length=5,
+        description="1 to 3 things A does better, each at most 20 words.",
+    )
+    b_strengths: list[str] = Field(
+        min_length=1,
+        max_length=5,
+        description="1 to 3 things B does better, each at most 20 words.",
+    )
+    recommendation: str = Field(
+        description="What to keep from each ad, in at most 2 sentences."
+    )
 
 
 class StoredComparison(Frozen):

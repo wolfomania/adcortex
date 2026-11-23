@@ -39,7 +39,6 @@ def detail(**changes: Any) -> dict[str, Any]:
     report = {
         "key_moments": [{"t": 1.0}],
         "recommendations": [{"t": None}, {"t": 4.2}],
-        "scene_notes": [{"scene_index": 0}],
     }
     state = {"status": "completed", "error": None, "timings": {"total": 9.5}}
     report_changes = changes.pop("report", {})
@@ -92,14 +91,13 @@ def test_times_must_lie_inside_the_clip(smoke: ModuleType) -> None:
     found = smoke.problems(
         detail(
             result={"moments": [{"t": -1.0}]},
-            report={"key_moments": [{"t": 4.3}], "scene_notes": [{"scene_index": 2}]},
+            report={"key_moments": [{"t": 4.3}]},
         )
     )
 
     assert found == [
         "moment at -1.0 s is outside the clip (0 to 4.2 s)",
         "report time at 4.3 s is outside the clip (0 to 4.2 s)",
-        "the report names scene 2, which does not exist",
     ]
 
 

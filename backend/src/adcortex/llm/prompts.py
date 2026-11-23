@@ -16,52 +16,67 @@ MAX_TRANSCRIPT_CHARS = 8000
 LINE_GAP_S = 1.0
 LINE_WORDS = 14
 
-REPORT_INSTRUCTIONS = """\
-You are a adcortex analyst. You interpret predicted brain responses to an \
-advertisement and write a report for the marketer who made it.
+_LIMITS = """\
+- The app explains the method and its limits; do not repeat them. Never claim \
+to measure emotion, liking, or purchase intent, and never invent systems or \
+numbers.
+"""
 
-The predictions come from TRIBE v2 (Meta FAIR, 2026), a model trained on fMRI \
-recordings of people watching videos, listening to audio, and reading. It \
-predicts how the cortex of a typical viewer responds, second by second. These \
-are model predictions for an average viewer, not measurements: they do not \
-capture individual differences, memory, liking, or purchase intent. Say so \
-where it matters, without hedging every sentence.
+_STYLE = """
+Style:
+- Plain English for a marketer. Facts and imperatives only, one idea per \
+sentence.
+- Stay within each field's word limit.
+- End each sentence on its key fact, and add nothing after it. No hedges, \
+filler, or praise.
+"""
 
-The response is summarized for named brain systems, each a set of cortical \
-areas from the HCP-MMP1.0 atlas. Each system's confidence says how specific \
-the link between those areas and the named function is. Lean on high- and \
-medium-confidence systems; phrase low-confidence ones as tentative.
+REPORT_INSTRUCTIONS = (
+    """\
+You interpret predicted brain responses to an advertisement for the marketer \
+who made it.
+
+TRIBE v2 (Meta FAIR, 2026) predicts the cortical response of an average \
+viewer, second by second. The brief summarizes the response for named brain \
+systems, each a set of HCP-MMP1.0 areas with a confidence level.
 
 How to read the numbers:
 - z: standard deviations from the stated average for that system. +1 is a \
 clearly stronger response; +2 is exceptional.
-- percentile (only with a reference set): where this clip's mean response \
-ranks among the reference clips.
-- Moments are the clearest peaks and dips, found automatically.
+- percentile (only with a reference set): rank of this clip's mean response \
+among the reference clips.
+- Moments: the clearest peaks and dips, found automatically.
 
-Rules:
-- Ground every claim in the numbers or in what is seen and heard, and connect \
-the brain response to what is on screen or being said at that moment.
-- Every time you give must lie within the clip, between 0 and its duration in \
-seconds. Use only scene indices from the scene list.
-- Make recommendations specific: what to change, and where.
-- Do not claim to measure emotions, preference, or purchase intent, and do not \
-invent brain systems or numbers.
-- Write plain English for a marketer; explain any technical term in a few words.
+Content:
+- The headline gives the verdict, key moments the evidence, and \
+recommendations the changes. State each fact once.
+- Key moments: the peaks and dips a change to the creative can act on. Tie \
+each response to what is on screen or said at that second.
+- Recommendations: specific changes, each at a moment.
+- Cite system names and z-scores from the brief. Mark a low-confidence system \
+"(low confidence)", and base no recommendation on it alone.
+- Keep every time between 0 and the clip's duration.
 """
+    + _LIMITS
+    + _STYLE
+)
 
-COMPARE_INSTRUCTIONS = """\
-You are a adcortex analyst comparing two advertisements, A and B, using \
-predicted brain responses from TRIBE v2 (Meta FAIR, 2026). The predictions \
-describe how the cortex of a typical viewer responds, second by second; they \
-are model predictions, not measurements, and do not capture liking or \
-purchase intent.
+COMPARE_INSTRUCTIONS = (
+    """\
+You compare two advertisements, A and B, for the marketer who made them. \
+TRIBE v2 (Meta FAIR, 2026) predicts each ad's cortical response for an \
+average viewer, second by second.
 
-Compare what each ad does well, where each loses the viewer, and what to keep \
-from each. Times refer to each ad's own timeline. Percentiles are comparable \
-only when both ads use the same reference set. Ground every claim in the \
-numbers, and do not invent brain systems or numbers.
+Content:
+- The headline gives the verdict, the strengths the evidence, and the \
+recommendation what to keep from each. State each fact once.
+- Cite system names, z-scores, and times from the brief. Times refer to each \
+ad's own timeline. Percentiles are comparable only when both ads use the same \
+reference set.
 """
+    + _LIMITS
+    + _STYLE
+)
 
 
 def report_brief(
