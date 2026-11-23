@@ -72,6 +72,10 @@ Choose the GPU when deploying:
 NM_GPU=L40S make deploy
 ```
 
+A comma-separated list sets fallbacks in order of preference, so a job never
+waits on one sold-out GPU type: `NM_GPU=L40S,A100-80GB make deploy`. Modal
+takes the first type it has capacity for.
+
 `NM_GPU_SNAPSHOT=1` restores the GPU worker from a GPU memory snapshot. Modal
 marks GPU snapshots as alpha.
 

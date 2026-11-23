@@ -42,8 +42,17 @@ ENV_FILE = Path(os.environ.get("NM_DEPLOY_ENV_FILE", ROOT / ".env"))
 APP_NAME = "neuromarketing"  # Settings.modal_app
 MINUTES = 60
 
+
+def gpu_choice(value: str) -> str | list[str]:
+    """One GPU type, or several in order of preference."""
+    types = [name.strip() for name in value.split(",") if name.strip()]
+    return types[0] if len(types) == 1 else types
+
+
 # `NM_GPU=L40S make deploy` picks another GPU; see docs/deploy.md for costs.
-GPU = os.environ.get("NM_GPU", "L4")
+# With a list, `NM_GPU=L40S,A100-80GB`, Modal takes the first type it has
+# capacity for, so a job never waits on one sold-out type.
+GPU = gpu_choice(os.environ.get("NM_GPU", "L4"))
 # Restores the GPU worker from a GPU memory snapshot (alpha on Modal).
 GPU_SNAPSHOT = os.environ.get("NM_GPU_SNAPSHOT") == "1"
 # TRIBE caches each job's features on the GPU worker's disk. Past this size,

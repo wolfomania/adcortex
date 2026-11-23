@@ -98,3 +98,8 @@ def test_a_full_feature_cache_recycles_the_gpu_worker(deploy: ModuleType) -> Non
     deploy.recycle_if_full(used=10, limit=10, stop=lambda: stops.append(False))
 
     assert stops == [True]
+
+
+def test_one_gpu_or_a_list_to_fall_back_on(deploy: ModuleType) -> None:
+    assert deploy.gpu_choice("L40S") == "L40S"
+    assert deploy.gpu_choice(" H100, L40S ,") == ["H100", "L40S"]
