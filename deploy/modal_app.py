@@ -107,6 +107,13 @@ def secret_values(env_file: Path) -> dict[str, str | None]:
     }
 
 
+def configure_logging(fmt: str = "%(levelname)s %(name)s: %(message)s") -> None:
+    """Show the app's INFO logs in Modal; Python drops them by default."""
+    logging.basicConfig(level=logging.INFO, format=fmt)
+    # The HTTP clients log every request at INFO: thousands of lines.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
+
 def cache_limit(free_bytes: int) -> int:
     """How far the feature cache may grow on a disk with `free_bytes` free."""
     return min(FEATURE_CACHE_LIMIT, free_bytes // 2)
@@ -243,6 +250,7 @@ with web_image.imports():  # type: ignore[no-untyped-call]
 @modal.concurrent(max_inputs=64)
 @modal.asgi_app()
 def web() -> Any:
+    configure_logging()
     return create_app()
 
 
@@ -257,6 +265,7 @@ def web() -> Any:
     enable_memory_snapshot=True,
 )
 def orchestrate(payload: dict[str, Any]) -> None:
+    configure_logging()
     run = make_runner(create_services(get_settings()))
     run(Job.model_validate(payload))
 
@@ -282,6 +291,7 @@ class BrainWorker:
         from neuromarketing.config import get_settings
         from neuromarketing.storage.factory import create_storage
 
+        configure_logging()
         config = get_settings()
         self.storage = create_storage(config)
         brain = create_brain(config)
@@ -324,9 +334,7 @@ class BrainWorker:
 )
 def prefetch_models(force: bool = False) -> None:
     """Download every model the GPU worker loads into the Volume `nm-models`."""
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
-    # The Hub client logs every HTTP request at INFO: thousands of lines.
-    logging.getLogger("httpx").setLevel(logging.WARNING)
+    configure_logging("%(message)s")
     if PREFETCHED.exists() and not force:
         log.info("Models are in place (%s). Pass --force to refresh.", PREFETCHED)
         return
