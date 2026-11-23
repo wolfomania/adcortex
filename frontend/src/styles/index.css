@@ -1,0 +1,276 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+/*
+ * The app is dark on screen. `dark:` utilities (used by shadcn/ui) apply on
+ * screen everywhere except inside `.theme-light`, which exported reports use.
+ * Print switches every token to the light theme below.
+ */
+@custom-variant dark {
+  @media screen {
+    &:not(:where(.theme-light, .theme-light *)) {
+      @slot;
+    }
+  }
+}
+
+/*
+ * Design tokens.
+ *
+ * One dark "lab" theme for the screen and one light theme for print and
+ * exported reports. Tailwind reads the variables through `@theme inline`;
+ * shadcn/ui components use the same names.
+ *
+ * Data colors follow one rule per job:
+ *   --viz-a / --viz-b   identity of analysis A and B (validated categorical pair)
+ *   --viz-neg / --viz-pos / --viz-mid
+ *                       diverging z-score scale: below / above the reference
+ *                       average, around a neutral gray midpoint
+ *   --status-*          reserved for state (ok, warning, failed); always shown
+ *                       with an icon and a label
+ */
+
+:root {
+  color-scheme: dark;
+
+  --radius: 0.5rem;
+
+  --background: oklch(0.155 0.008 250);
+  --foreground: oklch(0.955 0.004 250);
+  --card: oklch(0.19 0.009 250);
+  --card-foreground: oklch(0.955 0.004 250);
+  --popover: oklch(0.225 0.01 250);
+  --popover-foreground: oklch(0.955 0.004 250);
+  --primary: oklch(0.83 0.115 192);
+  --primary-foreground: oklch(0.2 0.03 220);
+  --secondary: oklch(0.255 0.011 250);
+  --secondary-foreground: oklch(0.955 0.004 250);
+  --muted: oklch(0.235 0.01 250);
+  --muted-foreground: oklch(0.72 0.014 250);
+  --accent: oklch(0.275 0.013 250);
+  --accent-foreground: oklch(0.975 0.003 250);
+  --destructive: oklch(0.68 0.19 25);
+  --border: oklch(1 0 0 / 0.085);
+  --input: oklch(1 0 0 / 0.13);
+  --ring: oklch(0.83 0.115 192);
+
+  --surface-sunken: oklch(0.135 0.008 250);
+  --text-secondary: oklch(0.84 0.01 250);
+
+  --viz-grid: oklch(0.27 0.01 250);
+  --viz-axis: oklch(0.38 0.012 250);
+  --viz-ink: oklch(0.93 0.005 250);
+  --viz-playhead: oklch(0.83 0.115 192);
+  --viz-a: #3987e5;
+  --viz-b: #d95926;
+  --viz-neg: oklch(0.72 0.13 252);
+  --viz-pos: oklch(0.72 0.16 27);
+  --viz-mid: oklch(0.36 0 0);
+
+  --status-good: #0ca30c;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+}
+
+/* Light theme: exported reports and anything inside `.theme-light`. */
+.theme-light {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --foreground: #0b0b0b;
+  --card: #ffffff;
+  --card-foreground: #0b0b0b;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b0b;
+  --primary: oklch(0.5 0.1 205);
+  --primary-foreground: #ffffff;
+  --secondary: #f2f2ef;
+  --secondary-foreground: #0b0b0b;
+  --muted: #f2f2ef;
+  --muted-foreground: #52514e;
+  --accent: #ebebe7;
+  --accent-foreground: #0b0b0b;
+  --destructive: #c42f2f;
+  --border: rgb(11 11 11 / 0.12);
+  --input: rgb(11 11 11 / 0.18);
+  --ring: oklch(0.5 0.1 205);
+
+  --surface-sunken: #f7f7f5;
+  --text-secondary: #3d3c3a;
+
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-ink: #1d1d1b;
+  --viz-playhead: oklch(0.5 0.1 205);
+  --viz-a: #2a78d6;
+  --viz-b: #eb6834;
+  --viz-neg: oklch(0.5 0.15 255);
+  --viz-pos: oklch(0.53 0.17 27);
+  --viz-mid: oklch(0.94 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sunken: var(--surface-sunken);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-viz-grid: var(--viz-grid);
+  --color-viz-axis: var(--viz-axis);
+  --color-viz-ink: var(--viz-ink);
+  --color-viz-playhead: var(--viz-playhead);
+  --color-viz-a: var(--viz-a);
+  --color-viz-b: var(--viz-b);
+  --color-viz-neg: var(--viz-neg);
+  --color-viz-pos: var(--viz-pos);
+  --color-viz-mid: var(--viz-mid);
+
+  --color-status-good: var(--status-good);
+  --color-status-warning: var(--status-warning);
+  --color-status-serious: var(--status-serious);
+  --color-status-critical: var(--status-critical);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-heading: var(--font-sans);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 35%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Numbers that line up in columns, axis ticks, and timecodes. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Faint instrument grid behind hero areas. */
+  .lab-grid {
+    background-image:
+      linear-gradient(to right, oklch(1 0 0 / 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .print-only {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print: the light theme, without interactive chrome. */
+@media print {
+  :root {
+    color-scheme: light;
+
+    --background: #ffffff;
+    --foreground: #0b0b0b;
+    --card: #ffffff;
+    --card-foreground: #0b0b0b;
+    --popover: #ffffff;
+    --popover-foreground: #0b0b0b;
+    --primary: oklch(0.5 0.1 205);
+    --primary-foreground: #ffffff;
+    --secondary: #f2f2ef;
+    --secondary-foreground: #0b0b0b;
+    --muted: #f2f2ef;
+    --muted-foreground: #52514e;
+    --accent: #ebebe7;
+    --accent-foreground: #0b0b0b;
+    --destructive: #c42f2f;
+    --border: rgb(11 11 11 / 0.14);
+    --input: rgb(11 11 11 / 0.18);
+    --surface-sunken: #f7f7f5;
+    --text-secondary: #3d3c3a;
+    --viz-grid: #e1e0d9;
+    --viz-axis: #c3c2b7;
+    --viz-ink: #1d1d1b;
+    --viz-playhead: transparent;
+    --viz-a: #2a78d6;
+    --viz-b: #eb6834;
+    --viz-neg: oklch(0.5 0.15 255);
+    --viz-pos: oklch(0.53 0.17 27);
+    --viz-mid: oklch(0.94 0 0);
+  }
+
+  @page {
+    margin: 14mm 12mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    font-size: 10.5pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-avoid-break {
+    break-inside: avoid;
+  }
+
+  .lab-grid {
+    background-image: none;
+  }
+}

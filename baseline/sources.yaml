@@ -1,0 +1,47 @@
+# Reference clips for backend/src/adcortex/data/baseline.json.
+# `make baseline` analyzes each clip on the deployed app and pools the
+# predictions. Each clip needs a `url` or a local `path` (relative to the
+# repository root), and its license. `start` and `end`, in seconds, cut a
+# segment from a longer file.
+#
+# The Instagram clips are not redistributed. Before a rebuild, download each
+# post, with its sound, into its `path`.
+version: v2
+description: 9 Instagram posts with sound, 12-117 s each.
+clips:
+  - id: DfcN7MlKm4a
+    title: Instagram post by @larkin.life
+    path: .adcortex-data/baseline/instagram/DfcN7MlKm4a.mp4
+    license: All rights reserved by @larkin.life (instagram.com/p/DfcN7MlKm4a)
+  - id: DfQLY5hsJH-
+    title: Instagram post by @knightfamilycontent
+    path: .adcortex-data/baseline/instagram/DfQLY5hsJH-.mp4
+    license: All rights reserved by @knightfamilycontent (instagram.com/p/DfQLY5hsJH-)
+  - id: DdRjGKkolyE
+    title: Instagram post by @tete.au.carre
+    path: .adcortex-data/baseline/instagram/DdRjGKkolyE.mp4
+    license: All rights reserved by @tete.au.carre (instagram.com/p/DdRjGKkolyE)
+  - id: DcgewBEqFh0
+    title: Instagram post by @kepka_aktobe
+    path: .adcortex-data/baseline/instagram/DcgewBEqFh0.mp4
+    license: All rights reserved by @kepka_aktobe (instagram.com/p/DcgewBEqFh0)
+  - id: DdLprVex-Ja
+    title: Instagram post by @maksim_titov_ls
+    path: .adcortex-data/baseline/instagram/DdLprVex-Ja.mp4
+    license: All rights reserved by @maksim_titov_ls (instagram.com/p/DdLprVex-Ja)
+  - id: Da8emfxsSmI
+    title: Instagram post by @buninsergey
+    path: .adcortex-data/baseline/instagram/Da8emfxsSmI.mp4
+    license: All rights reserved by @buninsergey (instagram.com/p/Da8emfxsSmI)
+  - id: DayG-iBN6RL
+    title: Instagram post by @shdbyzdn
+    path: .adcortex-data/baseline/instagram/DayG-iBN6RL.mp4
+    license: All rights reserved by @shdbyzdn (instagram.com/p/DayG-iBN6RL)
+  - id: Dam4lNhBOoH
+    title: Instagram post by @single.fate
+    path: .adcortex-data/baseline/instagram/Dam4lNhBOoH.mp4
+    license: All rights reserved by @single.fate (instagram.com/p/Dam4lNhBOoH)
+  - id: DaTJkavo5VT
+    title: Instagram post by @thauravault
+    path: .adcortex-data/baseline/instagram/DaTJkavo5VT.mp4
+    license: All rights reserved by @thauravault (instagram.com/p/DaTJkavo5VT)

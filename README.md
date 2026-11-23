@@ -1,313 +1,159 @@
-# AI Neuro-Marketing Validator
+# AdCortex
 
-Predict how the human brain responds to marketing videos using neuroscience-grade AI.
+[![CI](https://github.com/wolfomania/adcortex/actions/workflows/ci.yml/badge.svg)](https://github.com/wolfomania/adcortex/actions/workflows/ci.yml)
 
-Upload a video &rarr; **TRIBE v2** (Meta FAIR) predicts cortical activations &rarr; regions are mapped to the **Glasser Brain Atlas** &rarr; **Claude AI** interprets the neuroscience data into actionable marketing insights.
+See how an average viewer's brain would respond to an ad, second by second,
+before you run it.
 
----
+Upload a video, an audio spot, or a script. TRIBE v2, Meta FAIR's brain
+encoding model, predicts the response of the cortex. The app turns that
+prediction into ten brain systems, headline scores against reference ads, the
+moments that stand out, and a written report with recommendations.
 
-## Architecture
+![The results page: scores, the video at 0:11, and the predicted cortical response at that second](docs/images/results.jpg)
 
-```
-┌──────────────┐     ┌──────────────────────┐     ┌───────────────┐
-│  React + TS  │────▶│  FastAPI (Python)     │────▶│  TRIBE v2     │
-│  (Vite)      │◀────│                       │◀────│  (Meta FAIR)  │
-└──────────────┘     │  Pipeline:            │     └───────────────┘
-                     │  1. Video validation   │
-                     │  2. Brain prediction   │     ┌───────────────┐
-                     │  3. ROI aggregation    │────▶│  Claude API   │
-                     │  4. AI interpretation  │◀────│  (Anthropic)  │
-                     └──────────────────────┘     └───────────────┘
-```
+## What you get
 
-## Features
+- **A cortical response for every second.** TRIBE v2 predicts the fMRI
+  response at 20,484 points of the cortex from what the clip shows, sounds
+  like, and says. A 3D brain plays it back in sync with the video.
+- **Ten brain systems, with honest confidence.** Early visual, Motion, Faces,
+  Places & scenes, Sound, Speech & language, Social cognition, Attention,
+  Salience, and Valuation, each a set of HCP-MMP1.0 areas labeled high,
+  medium, or low confidence.
+- **Scores against reference ads.** Response index, Hook (the first 3
+  seconds), Sustain, and Peaks, plus each system's percentile among the
+  reference ads and among your own analyses. The bundled reference library
+  holds 9 Instagram posts; add your own ads to it
+  ([details](docs/science.md#comparing-with-reference-ads)).
+- **A timeline of moments.** A heatmap of every system over time, with peaks
+  and dips marked under the scene thumbnails. Click anywhere to jump there.
+- **A written report from the model you choose.** Gemini, Claude, OpenAI, or
+  any other model [Pydantic AI](https://ai.pydantic.dev/) supports. It watches
+  the clip when the model accepts video (Gemini does) and looks at scene
+  keyframes otherwise, explains the numbers, and ties each recommendation to a
+  moment. The report is optional: the metrics stand on their own.
+- **History, A/B comparison, and sharing.** Compare two cuts side by side with
+  a written comparison, share a read-only link, and export a standalone HTML
+  report, a PDF, or the raw data.
+- **Easy to run.** Locally without a GPU, or on [Modal](https://modal.com)
+  with one command. Every part scales to zero when idle.
 
-- **Video Upload & Validation** — accepts 15-60s marketing videos (up to 100 MB), validates with ffprobe
-- **Brain Activation Prediction** — TRIBE v2 predicts neural responses across 20,484 cortical vertices
-- **Region-of-Interest Mapping** — aggregates vertex-level data to Glasser Atlas brain regions (180 per hemisphere)
-- **AI-Powered Interpretation** — Claude analyzes top activated regions and generates marketing insights
-- **Real-time Processing Status** — live progress tracking through each pipeline stage
-- **Visual Brain Maps** — static brain activation heatmaps via TRIBE v2 plotting
-- **Mock Mode** — full development workflow without GPU or API keys
+![The timeline heatmap of the ten systems, the written report, and the systems ranked against the reference ads](docs/images/timeline.jpg)
 
-## Tech Stack
+## Try it locally
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite 8 |
-| Backend | FastAPI, Python 3.11+, uv |
-| ML Model | TRIBE v2 (Meta FAIR) + Llama 3.2-3B |
-| LLM | Claude API (Anthropic SDK) |
-| Brain Atlas | Glasser HCP MMP 1.0 (360 regions) |
-| Deployment | Modal.com (serverless GPU) |
+You need [uv](https://docs.astral.sh/uv/), Node.js 22.12 or later with pnpm
+(`corepack enable`), and ffmpeg. uv installs Python 3.12 if it is missing.
 
-## Quick Start (local)
-
-### Prerequisites
-
-- Python 3.11+ with [uv](https://docs.astral.sh/uv/)
-- Node.js 18+
-- (Optional) NVIDIA GPU with CUDA for TRIBE v2 inference
-- (Optional) Anthropic API key for Claude analysis
-
-### Setup
-
-```bash
-# Clone
-git clone https://github.com/wolfomania/AI-Neuro-Marketing-Validator.git
-cd AI-Neuro-Marketing-Validator
-
-# Backend
-cd backend
-cp ../.env.example .env  # edit with your API keys
-uv sync --all-extras
-uv run uvicorn neuromarketing.main:app --reload
-
-# Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
+```sh
+git clone https://github.com/wolfomania/adcortex.git
+cd adcortex
+cp .env.example .env
+make install
+make dev
 ```
 
-The app runs at `http://localhost:5173` with the API at `http://localhost:8000`.
+`make dev` starts the API on port 8000 and the app on
+<http://localhost:5173>. Locally the brain is a mock that makes deterministic,
+synthetic responses, so no GPU is needed; everything else is real. To get
+written reports, set `ADCORTEX_LLM_MODEL` and its key in `.env`.
 
-### Mock Mode (no GPU required)
+To try the interface alone, `make dev-ui` serves the app with a mock API in
+the browser: seeded analyses, reports, and a reference library, without Python
+or ffmpeg. The screenshots on this page come from it.
 
-Set `NM_USE_MOCK=true` in your `.env` — runs the full pipeline with synthetic brain data, fake Claude report. Good for UI/frontend development.
+## Deploy on Modal
 
-> **Note:** `NM_USE_MOCK=true` disables Claude even if you have an API key set. There is no "fake TRIBE + real Claude" mode without code changes.
-
----
-
-## Deploy to Modal.com
-
-Two deployment modes:
-
-| Mode | Modal class | GPU | Brain data | Claude | Cost |
-|------|-------------|-----|-----------|--------|------|
-| Mock | `WebService` | No | Synthetic | Fake | $0 |
-| Real | `GpuService` | A100 | TRIBE v2 | Real | ~$0.50–2/video |
-
-### Prerequisites
-
-- Python 3.11+ and Node.js 18+ installed locally
-- [Modal.com](https://modal.com) account (free tier: $30 credits)
-- Anthropic API key (for real mode)
-- HuggingFace token with access to `facebook/tribev2` and `meta-llama/Llama-3.2-3B` (for real mode)
-
-### Phase 1 — Mock deployment (~10 min, free)
-
-**Step 1 — Install Modal CLI and authenticate**
-
-```bash
-pip install modal
-modal token new   # opens browser, log in
+```sh
+cp .env.example .env   # set HF_TOKEN and ADCORTEX_PASSWORD; optionally ADCORTEX_LLM_MODEL and its key
+make deploy
 ```
 
-**Step 2 — Build the frontend** (must happen before every deploy)
+Set `ADCORTEX_PASSWORD`: without it, anyone who finds the app's URL can run
+analyses on your GPU and read or delete every analysis.
 
-```bash
-cd frontend
-npm install
-npm run build
-cd ..
-ls frontend/dist/index.html   # verify this exists
+The first deploy downloads about 20 GB of models into a Modal Volume and
+builds the images; later deploys reuse both. The GPU worker, an L40S by
+default ($2.46 per hour with its CPU and RAM), runs only while there is work
+and for 10 idle minutes after. Once warm, it analyzes a 60 s video in about
+2.5 minutes. `ADCORTEX_GPU=L4 make deploy` picks a GPU that costs about half
+as much per hour and takes a little over 4 minutes
+([benchmarks](docs/benchmarks.md)).
+`make baseline` rebuilds the reference library from `baseline/sources.yaml`
+([how](docs/deploy.md#reference-library)).
+See [docs/deploy.md](docs/deploy.md) for the details, costs, and operations.
+
+## Configuration
+
+Settings come from `.env` (see [.env.example](.env.example)). All are
+optional except `HF_TOKEN` for a Modal deployment.
+
+| Setting | Default | What it does |
+|---|---|---|
+| `ADCORTEX_LLM_MODEL` | none | The report model, such as `google:gemini-4-hydrogen` or `anthropic:claude-opus-5-5`. A comma-separated list adds fallbacks: when a model returns an error, such as 503 under high demand, the next one answers. Empty: no written reports. |
+| `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` | none | The key for the provider in `ADCORTEX_LLM_MODEL`. |
+| `ADCORTEX_LLM_MEDIA` | `video` | What the report model sees besides the metrics: `video` (the clip, when the model accepts it), `keyframes` (up to 16 scene frames), or `text` (nothing else). |
+| `ADCORTEX_LLM_OUTPUT_MODE` | `tool` | How the model returns the report: `tool`, `native`, or `prompted`. |
+| `ADCORTEX_PASSWORD` | none | Require a login. Share links still work without one. |
+| `ADCORTEX_SECRET_KEY` | generated | Signs sessions and share links. If empty, a random key is kept in storage. |
+| `ADCORTEX_SESSION_DAYS` | `30` | How long a login lasts. |
+| `HF_TOKEN` | none | A Hugging Face token whose account accepted the Llama 3.2 license; Modal uses it to download the models. |
+| `ADCORTEX_BRAIN_BACKEND` | `mock` | Local only: `mock`, `replay` (a recorded TRIBE v2 run), or `tribe` (needs a GPU). Modal always uses `tribe`. |
+| `ADCORTEX_MIN_DURATION_S`, `ADCORTEX_MAX_DURATION_S`, `ADCORTEX_MAX_UPLOAD_MB` | `3`, `180`, `500` | Upload limits. |
+
+Data leaves your deployment in two places. The report model's provider
+receives the metrics and, depending on `ADCORTEX_LLM_MEDIA`, the clip or its
+keyframes; some providers' free tiers may use such data to improve their
+products. Scripts go to Google Translate's text-to-speech service, through
+gTTS, to be read aloud.
+
+## How it works
+
+Uploads become analyses that a background job carries through four stages:
+prepare the media, predict the cortical response on a GPU, measure the
+systems and scores, and write the report. One FastAPI app serves the API and
+the React app.
+
+- [docs/architecture.md](docs/architecture.md): the parts, the data, and the
+  tests, with a diagram.
+- [docs/science.md](docs/science.md): how each number is computed, the
+  systems and their sources, the limitations, and the licenses.
+- [docs/api.md](docs/api.md): the HTTP API.
+- [docs/deploy.md](docs/deploy.md): deploying and running on Modal.
+
+![Two cuts of the same ad compared: scores, the response over time, and the systems](docs/images/compare.jpg)
+
+## Development
+
+```sh
+make test                                  # backend and frontend tests
+make lint                                  # ruff, mypy, ESLint, and tsc
+pnpm --dir frontend check                  # everything CI checks in the frontend
+pnpm --dir frontend exec playwright install chromium
+pnpm --dir frontend e2e                    # end-to-end tests in Chromium
 ```
 
-**Step 3 — Create Modal secret**
+| Folder | Content |
+|---|---|
+| `backend/` | The FastAPI app, the pipeline, and the analysis (Python 3.12, uv) |
+| `frontend/` | The React app (TypeScript, pnpm) |
+| `deploy/modal_app.py` | The Modal app: web tier, job runner, and GPU worker |
+| `docs/` | Architecture, science, API, and deployment |
 
-```bash
-modal secret create neuromarketing-secrets \
-  NM_USE_MOCK="true" \
-  NM_ANTHROPIC_API_KEY="" \
-  NM_HF_TOKEN="" \
-  NM_UPLOAD_DIR="/data/uploads" \
-  NM_RESULTS_DIR="/data/results" \
-  NM_CORS_ORIGINS="*"
-```
+## Limitations
 
-To add access token protection (recommended):
+The numbers are predictions for an average viewer, not measurements of real
+people. They do not capture individual differences, memory, liking, or
+purchase intent, and they do not forecast sales. Treat them as hypotheses to
+test. TRIBE v2 was trained on English, so other languages are less reliable,
+and the low-confidence systems are hints rather than measurements. See
+[docs/science.md](docs/science.md#limitations).
 
-```bash
-# Generate a token
-python -c "import secrets; print(secrets.token_urlsafe(32))"
+## Licenses of the models and data
 
-# Include NM_ACCESS_TOKEN in the secret
-modal secret create neuromarketing-secrets \
-  NM_USE_MOCK="true" \
-  NM_ANTHROPIC_API_KEY="" \
-  NM_HF_TOKEN="" \
-  NM_UPLOAD_DIR="/data/uploads" \
-  NM_RESULTS_DIR="/data/results" \
-  NM_CORS_ORIGINS="*" \
-  NM_ACCESS_TOKEN="<your-generated-token>"
-```
-
-**Step 4 — Smoke test locally**
-
-```bash
-modal serve modal_app.py
-```
-
-Modal prints a temporary URL. Open it, upload a `.mp4` (15–60s), verify the full UI flow. `Ctrl+C` when done.
-
-**Step 5 — Deploy permanently**
-
-```bash
-modal deploy modal_app.py
-```
-
-Output:
-```
-✓ WebService.web  => https://YOUR-WORKSPACE--neuromarketing-webservice-web.modal.run
-✓ GpuService.web  => https://YOUR-WORKSPACE--neuromarketing-gpuservice-web.modal.run
-```
-
-Use the **`webservice` URL** for mock mode.
-
-### Phase 2 — Real GPU inference
-
-**Step 6 — Download model weights** (run once, ~10 min, billed GPU time)
-
-```bash
-modal run modal_app.py::download_model
-```
-
-Downloads TRIBE v2 and Llama 3.2-3B into a persistent Modal volume (`nm-model-cache`).
-
-**Step 7 — Update secret with real keys**
-
-```bash
-modal secret create neuromarketing-secrets --force \
-  NM_USE_MOCK="false" \
-  NM_ANTHROPIC_API_KEY="sk-ant-YOUR-KEY" \
-  NM_HF_TOKEN="hf_YOUR-TOKEN" \
-  NM_UPLOAD_DIR="/data/uploads" \
-  NM_RESULTS_DIR="/data/results" \
-  NM_CORS_ORIGINS="*" \
-  NM_ACCESS_TOKEN="<your-token>"
-```
-
-**Step 8 — Redeploy**
-
-```bash
-modal deploy modal_app.py
-```
-
-Use the **`gpuservice` URL** for real inference.
-
-### Accessing a token-protected deployment
-
-If `NM_ACCESS_TOKEN` is set, the API rejects unauthenticated requests with `401`. The frontend reads the token from `localStorage`. Set it once in the browser console on the deployed site:
-
-```javascript
-localStorage.setItem('nm_access_token', 'YOUR-TOKEN-HERE')
-```
-
-Refresh. Token persists across sessions. Alternatively, pass it as a query param:
-
-```
-https://your-url.modal.run/?token=YOUR-TOKEN-HERE
-```
-
-> `/api/health` is always open (no token required).
-
----
-
-## Useful Commands
-
-```bash
-# View logs
-modal app logs neuromarketing
-
-# List deployments
-modal app list
-
-# Stop a deployment
-modal app stop neuromarketing
-
-# Update a secret (--force overwrites)
-modal secret create neuromarketing-secrets --force KEY=value ...
-
-# Run model download again
-modal run modal_app.py::download_model
-```
-
-## Cost Estimates
-
-| Scenario | Monthly cost |
-|----------|-------------|
-| Mock mode, scale-to-zero | $0 (within free credits) |
-| Light GPU usage (~10 videos) | ~$5–20 |
-| Always-warm CPU container (24/7) | ~$35 |
-| Always-warm A100 GPU (24/7) | ~$2,000+ |
-
-Modal bills per-second. Scale-to-zero (`min_containers=0`) costs nothing while idle. First request after idle takes 30–60s for container spin-up; set `min_containers=1` in `modal_app.py` to avoid cold starts (adds ~$0.05/hr for CPU).
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| `modal: command not found` | `pip install modal` |
-| `Secret not found` | `modal secret list` — check name is `neuromarketing-secrets` |
-| Frontend shows blank page | Rebuild: `cd frontend && npm run build`, then redeploy |
-| 401 on every request | Set token in browser console: `localStorage.setItem('nm_access_token', '...')` |
-| 403 IP not allowed | Check your IP: `curl ifconfig.me`, update `NM_ALLOWED_IPS` in secret |
-| Cold start takes 30–60s | Expected. Set `min_containers=1` in `modal_app.py` to skip (costs ~$0.05/hr) |
-| Brain images missing | Normal on first run if nilearn fetch fails — pipeline continues without them |
-
----
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/analysis` | Upload video, start analysis |
-| `GET` | `/api/analysis/{id}/status` | Poll processing status |
-| `GET` | `/api/analysis/{id}` | Get full results with report |
-| `GET` | `/api/analysis/{id}/images/{name}` | Brain activation PNGs |
-| `GET` | `/api/health` | Health check (always open) |
-
-## Environment Variables
-
-See [`.env.example`](.env.example) for all options.
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NM_ANTHROPIC_API_KEY` | For Claude analysis | Anthropic API key |
-| `NM_HF_TOKEN` | For model download | HuggingFace token (read access) |
-| `NM_USE_MOCK` | No | Synthetic mode — skips GPU and Claude (default: `false`) |
-| `NM_ACCESS_TOKEN` | No | Bearer token to protect the API |
-| `NM_ALLOWED_IPS` | No | Comma-separated IP allowlist (e.g. `1.2.3.4,5.6.7.8`) |
-| `NM_TOP_K_ROIS` | No | Brain regions passed to Claude (default: `20`) |
-| `NM_CLAUDE_MODEL` | No | Claude model ID (default: `claude-sonnet-4-20250514`) |
-
-## Project Structure
-
-```
-.
-├── backend/
-│   ├── src/neuromarketing/
-│   │   ├── api/            # FastAPI routes
-│   │   ├── middleware/     # Access guard (IP + token auth)
-│   │   ├── schemas/        # Pydantic models & enums
-│   │   ├── services/       # TRIBE, Claude, pipeline, storage
-│   │   ├── utils/          # Video processing helpers
-│   │   ├── data/           # Glasser atlas lookup
-│   │   ├── config.py       # Settings (pydantic-settings)
-│   │   └── main.py         # App factory & lifespan
-│   └── tests/              # pytest suite
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Upload, Processing, Results views
-│   │   ├── hooks/          # useAnalysis polling hook
-│   │   ├── api/            # HTTP client
-│   │   └── types/          # TypeScript interfaces
-│   └── public/
-├── modal_app.py            # Modal.com deployment (WebService + GpuService)
-└── .env.example
-```
-
-## License
-
-MIT
+TRIBE v2's weights are licensed CC BY-NC 4.0: non-commercial use only. Llama
+3.2 has its own license, which your Hugging Face account accepts. The
+HCP-MMP1.0 atlas data are redistributed under the WU-Minn HCP Open Access Data
+Use Terms; the required acknowledgment is in
+[backend/src/adcortex/data/README.md](backend/src/adcortex/data/README.md).

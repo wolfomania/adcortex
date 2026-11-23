@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "systems": [
+    {
+      "id": "visual",
+      "label": "Early visual",
+      "confidence": "high",
+      "visual": true,
+      "parcels": [
+        "V1",
+        "V2",
+        "V3",
+        "V4"
+      ],
+      "description": "Low-level vision: contrast, edges, color, and how much the picture changes. Rises with bright, busy, or fast-changing frames.",
+      "citations": [
+        {
+          "key": "wandell2007",
+          "text": "Wandell BA, Dumoulin SO, Brewer AA (2007). Visual field maps in human cortex. Neuron 56:366-383. doi:10.1016/j.neuron.2007.10.012"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "motion",
+      "label": "Motion",
+      "confidence": "high",
+      "visual": true,
+      "parcels": [
+        "MT",
+        "MST",
+        "FST",
+        "V4t"
+      ],
+      "description": "The MT+ complex tracks visual motion: moving objects, camera moves, and optic flow.",
+      "citations": [
+        {
+          "key": "huk2002",
+          "text": "Huk AC, Dougherty RF, Heeger DJ (2002). Retinotopy and functional subdivision of human areas MT and MST. J Neurosci 22:7195-7205. doi:10.1523/JNEUROSCI.22-16-07195.2002"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "faces",
+      "label": "Faces",
+      "confidence": "medium",
+      "visual": true,
+      "parcels": [
+        "FFC",
+        "PIT"
+      ],
+      "description": "Fusiform face complex and posterior inferotemporal cortex, which respond most to faces and, more weakly, to bodies and objects.",
+      "citations": [
+        {
+          "key": "kanwisher1997",
+          "text": "Kanwisher N, McDermott J, Chun MM (1997). The fusiform face area. J Neurosci 17:4302-4311. doi:10.1523/JNEUROSCI.17-11-04302.1997"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "scenes",
+      "label": "Places & scenes",
+      "confidence": "medium",
+      "visual": true,
+      "parcels": [
+        "PHA1",
+        "PHA2",
+        "PHA3",
+        "VMV1",
+        "VMV2",
+        "VMV3",
+        "RSC"
+      ],
+      "description": "Parahippocampal and retrosplenial areas that respond to places, landscapes, and spatial layout.",
+      "citations": [
+        {
+          "key": "epstein1998",
+          "text": "Epstein R, Kanwisher N (1998). A cortical representation of the local visual environment. Nature 392:598-601. doi:10.1038/33402"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "sound",
+      "label": "Sound",
+      "confidence": "high",
+      "visual": false,
+      "parcels": [
+        "A1",
+        "LBelt",
+        "MBelt",
+        "PBelt",
+        "RI"
+      ],
+      "description": "Early auditory cortex: loudness, pitch, and acoustic change in music, voice, and effects.",
+      "citations": [
+        {
+          "key": "moerel2014",
+          "text": "Moerel M, De Martino F, Formisano E (2014). An anatomical and functional topography of human auditory cortical areas. Front Neurosci 8:225. doi:10.3389/fnins.2014.00225"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "speech",
+      "label": "Speech & language",
+      "confidence": "medium",
+      "visual": false,
+      "parcels": [
+        "A4",
+        "A5",
+        "STSda",
+        "STSdp",
+        "STSva",
+        "STSvp",
+        "STGa",
+        "44",
+        "45",
+        "47l",
+        "55b",
+        "PSL",
+        "SFL"
+      ],
+      "description": "Superior temporal and inferior frontal language areas. They follow spoken words and, more strongly, meaningful sentences.",
+      "citations": [
+        {
+          "key": "fedorenko2010",
+          "text": "Fedorenko E et al. (2010). New method for fMRI investigations of language. J Neurophysiol 104:1177-1194. doi:10.1152/jn.00032.2010"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "label": "Social cognition",
+      "confidence": "low",
+      "visual": false,
+      "parcels": [
+        "TPOJ1",
+        "TPOJ2",
+        "STV",
+        "PGi",
+        "TGd",
+        "TGv",
+        "9m",
+        "PCV"
+      ],
+      "description": "Temporo-parietal junction, temporal pole, and medial cortex, linked to thinking about people's intentions and stories.",
+      "citations": [
+        {
+          "key": "saxe2003",
+          "text": "Saxe R, Kanwisher N (2003). People thinking about thinking people: the role of the temporo-parietal junction in \"theory of mind\". NeuroImage 19:1835-1842. doi:10.1016/S1053-8119(03)00230-1"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "attention",
+      "label": "Attention",
+      "confidence": "medium",
+      "visual": false,
+      "parcels": [
+        "FEF",
+        "PEF",
+        "LIPv",
+        "LIPd",
+        "VIP",
+        "IPS1",
+        "7PC",
+        "7AL",
+        "7PL",
+        "MIP",
+        "AIP"
+      ],
+      "description": "Dorsal attention network (frontal eye fields and intraparietal sulcus), engaged when the viewer orients to and tracks what is on screen.",
+      "citations": [
+        {
+          "key": "corbetta2002",
+          "text": "Corbetta M, Shulman GL (2002). Control of goal-directed and stimulus-driven attention in the brain. Nat Rev Neurosci 3:201-215. doi:10.1038/nrn755"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "salience",
+      "label": "Salience",
+      "confidence": "low",
+      "visual": false,
+      "parcels": [
+        "AVI",
+        "AAIC",
+        "MI",
+        "FOP4",
+        "FOP5",
+        "a24pr",
+        "p24pr",
+        "33pr",
+        "p32pr",
+        "a32pr"
+      ],
+      "description": "Anterior insula and dorsal anterior cingulate, which respond to surprising, important, or emotionally charged moments.",
+      "citations": [
+        {
+          "key": "seeley2007",
+          "text": "Seeley WW et al. (2007). Dissociable intrinsic connectivity networks for salience processing and executive control. J Neurosci 27:2349-2356. doi:10.1523/JNEUROSCI.5587-06.2007"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    },
+    {
+      "id": "valuation",
+      "label": "Valuation",
+      "confidence": "low",
+      "visual": false,
+      "parcels": [
+        "10r",
+        "10v",
+        "s32",
+        "25",
+        "OFC",
+        "pOFC",
+        "11l",
+        "13l"
+      ],
+      "description": "Ventromedial prefrontal and orbitofrontal cortex, associated with subjective value. The least reliable system: fMRI signal here is weak.",
+      "citations": [
+        {
+          "key": "bartra2013",
+          "text": "Bartra O, McGuire JT, Kable JW (2013). The valuation system: a coordinate-based meta-analysis of BOLD fMRI experiments examining neural correlates of subjective value. NeuroImage 76:412-427. doi:10.1016/j.neuroimage.2013.02.063"
+        },
+        {
+          "key": "glasser2016",
+          "text": "Glasser MF et al. (2016). A multi-modal parcellation of human cerebral cortex. Nature 536:171-178. doi:10.1038/nature18933"
+        }
+      ]
+    }
+  ]
+}
