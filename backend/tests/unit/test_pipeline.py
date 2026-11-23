@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pytest
 from pydantic_ai import BinaryContent
 from pydantic_ai.messages import ModelMessage, ModelResponse
@@ -105,6 +106,19 @@ class SpyBrain:
         if self._error is not None:
             raise self._error
         return self._brain.predict(job, media)
+
+
+class RisingBrain(SpyBrain):
+    """Every vertex rises by 1e-4 per second: too little for float16 to keep."""
+
+    def predict(self, job: BrainJob, media: Path) -> BrainPrediction:
+        self.jobs.append(job)
+        seconds = int(np.ceil(job.duration_s))
+        rises = 1.0 + 1e-4 * np.arange(seconds, dtype=np.float32)
+        return BrainPrediction(
+            preds=np.repeat(rises[:, None], N_VERTICES, axis=1),
+            times=np.arange(seconds, dtype=np.float64),
+        )
 
 
 class SpyProgress(MemoryProgressStore):
@@ -461,6 +475,19 @@ def test_identical_uploads_reuse_the_prediction(
         first, PREDICTION
     )
     assert repo.get_result(second).systems == repo.get_result(first).systems
+
+
+def test_a_retry_measures_the_prediction_the_first_run_measured(
+    services: Services, media_dir: Path
+) -> None:
+    services = replace(services, brain=RisingBrain())
+    analysis_id = _upload(services, media_dir / "tone.wav", MediaKind.AUDIO)
+    _completed(_run(services, analysis_id))
+    first = services.repo.get_result(analysis_id).systems
+
+    _completed(_run(services, analysis_id))
+
+    assert services.repo.get_result(analysis_id).systems == first
 
 
 def test_a_retry_reuses_its_own_prediction(

@@ -50,10 +50,12 @@ def predict(
     )
     prediction = brain.predict(job, prepared.files[prepared.brain_input])
     tracker.check()
-    services.repo.put_artifact_bytes(meta.id, PREDICTION, prediction.to_npz())
+    data = prediction.to_npz()
+    services.repo.put_artifact_bytes(meta.id, PREDICTION, data)
     services.repo.remember_fingerprint(key, meta.id)
     tracker.add_timings({f"brain_{k}": v for k, v in prediction.timings.items()})
-    return Predicted(prediction)
+    # Measure the stored float16 copy, as a reuse or a retry will.
+    return Predicted(BrainPrediction.from_npz(data))
 
 
 def _reuse(
