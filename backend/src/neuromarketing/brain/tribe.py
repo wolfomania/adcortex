@@ -30,6 +30,7 @@ import shutil
 import tempfile
 import threading
 import time
+import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -102,6 +103,13 @@ class TribeBrain:
     def warmup(self) -> None:
         self._load()
 
+    def cache_bytes(self) -> int:
+        """Disk taken by cached features, which grow with every job."""
+        if not self._cache_dir.is_dir():
+            return 0
+        files = (path for path in self._cache_dir.rglob("*") if path.is_file())
+        return sum(path.stat().st_size for path in files)
+
     def _load(self) -> Any:
         with self._lock:
             if self._model is None:
@@ -121,18 +129,17 @@ class TribeBrain:
     def predict(self, request: BrainRequest) -> BrainPrediction:
         model = self._load()
         timings: dict[str, float] = {}
-        # A fresh path per job: feature caches are keyed by file path.
+        # TRIBE caches features by file path, so each job gets a unique path
+        # and never reads another clip's features. The cache itself must stay:
+        # its folders are created once, when the model loads, and a job fails
+        # if they disappear. `cache_bytes` lets the host bound its growth.
         with tempfile.TemporaryDirectory(prefix="tribe-job-") as tmp:
-            media = Path(tmp) / f"input{request.media.suffix.lower()}"
+            media = Path(tmp) / f"{uuid.uuid4().hex}{request.media.suffix.lower()}"
             shutil.copyfile(request.media, media)
-            try:
-                with _timed(timings, "events"):
-                    events, language, placed = self._events(media, request)
-                with _timed(timings, "predict"):
-                    preds, segments = model.predict(events, verbose=False)
-            finally:
-                shutil.rmtree(self._cache_dir, ignore_errors=True)
-                self._cache_dir.mkdir(parents=True, exist_ok=True)
+            with _timed(timings, "events"):
+                events, language, placed = self._events(media, request)
+            with _timed(timings, "predict"):
+                preds, segments = model.predict(events, verbose=False)
         if len(segments) == 0:
             raise PipelineError(
                 "The brain model returned no predictions for this clip."

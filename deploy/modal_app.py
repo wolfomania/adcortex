@@ -23,9 +23,11 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import subprocess
 import sys
-from collections.abc import Mapping
+import tempfile
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -44,6 +46,10 @@ MINUTES = 60
 GPU = os.environ.get("NM_GPU", "L4")
 # Restores the GPU worker from a GPU memory snapshot (alpha on Modal).
 GPU_SNAPSHOT = os.environ.get("NM_GPU_SNAPSHOT") == "1"
+# TRIBE caches each job's features on the GPU worker's disk. Past this size,
+# or half the disk that was free at start, the worker stops after its current
+# job, and the next job starts a fresh container.
+FEATURE_CACHE_LIMIT = 20 * 1024**3
 
 TRIBE_COMMIT = "af58661791a351a448a489042a28f6c37e1c14b7"
 WHISPERX_VERSION = "3.8.6"
@@ -99,6 +105,19 @@ def secret_values(env_file: Path) -> dict[str, str | None]:
         for key, value in dotenv_values(env_file).items()
         if value and key not in DEPLOYMENT_KEYS
     }
+
+
+def cache_limit(free_bytes: int) -> int:
+    """How far the feature cache may grow on a disk with `free_bytes` free."""
+    return min(FEATURE_CACHE_LIMIT, free_bytes // 2)
+
+
+def recycle_if_full(used: int, limit: int, stop: Callable[[], object]) -> None:
+    """Stop taking jobs once the feature cache has outgrown `limit`."""
+    log.info("Feature cache: %.1f of %.1f GB", used / 1e9, limit / 1e9)
+    if used > limit:
+        log.info("The feature cache is full; the worker stops after this job.")
+        stop()
 
 
 def warn_if_open(values: Mapping[str, str | None]) -> None:
@@ -259,20 +278,36 @@ class BrainWorker:
     @modal.enter(snap=GPU_SNAPSHOT)
     def load(self) -> None:
         from neuromarketing.brain.factory import create_brain
+        from neuromarketing.brain.tribe import TribeBrain
         from neuromarketing.config import get_settings
         from neuromarketing.storage.factory import create_storage
 
         config = get_settings()
         self.storage = create_storage(config)
-        self.brain = create_brain(config)
-        self.brain.warmup()
+        brain = create_brain(config)
+        if not isinstance(brain, TribeBrain):
+            raise RuntimeError("The GPU worker runs TRIBE v2 (NM_BRAIN_BACKEND=tribe).")
+        brain.warmup()
+        self.brain = brain
+        self.cache_limit = cache_limit(shutil.disk_usage(tempfile.gettempdir()).free)
 
     @modal.method()
     def predict(self, payload: dict[str, Any]) -> bytes:
+        import modal.experimental
+
         from neuromarketing.pipeline.worker import run_brain_job
 
         storage = self.storage
-        return run_brain_job(self.brain, storage.repository, storage.progress, payload)
+        try:
+            return run_brain_job(
+                self.brain, storage.repository, storage.progress, payload
+            )
+        finally:
+            recycle_if_full(
+                self.brain.cache_bytes(),
+                self.cache_limit,
+                modal.experimental.stop_fetching_inputs,
+            )
 
     @modal.method()
     def warmup(self) -> None:

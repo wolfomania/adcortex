@@ -82,3 +82,19 @@ def test_stays_quiet_when_a_password_protects_the_deployment(
     deploy.warn_if_open({"NM_PASSWORD": "a long passphrase"})
 
     assert capsys.readouterr().err == ""
+
+
+def test_the_feature_cache_may_use_half_the_free_disk(deploy: ModuleType) -> None:
+    gib = 1024**3
+
+    assert deploy.cache_limit(10 * gib) == 5 * gib
+    assert deploy.cache_limit(1000 * gib) == deploy.FEATURE_CACHE_LIMIT
+
+
+def test_a_full_feature_cache_recycles_the_gpu_worker(deploy: ModuleType) -> None:
+    stops: list[bool] = []
+
+    deploy.recycle_if_full(used=11, limit=10, stop=lambda: stops.append(True))
+    deploy.recycle_if_full(used=10, limit=10, stop=lambda: stops.append(False))
+
+    assert stops == [True]
