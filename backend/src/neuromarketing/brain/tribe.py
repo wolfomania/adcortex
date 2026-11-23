@@ -16,6 +16,10 @@ pipeline of `TribeModel.get_events_dataframe` with three changes:
 3. Sentence splitting. neuralset ships spaCy pipelines for four languages
    only; the rest use the multilingual `xx_sent_ud_sm` splitter. If text
    annotation still fails, the prediction uses video and audio features only.
+4. Speed. V-JEPA 2 runs under float16 autocast with its frames resized on the
+   GPU (`patch_video_model`), and float32 matrix products use TF32 tensor
+   cores (`allow_tensor_cores`). docs/benchmarks.md compares the predictions
+   with float32 ones.
 
 The image provides tribev2 (commit af58661), the spaCy pipelines
 `en_core_web_lg` and `xx_sent_ud_sm`, ffmpeg 4-7 (torchcodec cannot load 8),
@@ -61,6 +65,8 @@ WORD_COLUMNS_FROM_AUDIO_EXCLUDED = frozenset(
 
 _spacy_lock = threading.Lock()
 _spacy_patched = False
+_video_lock = threading.Lock()
+_video_patched = False
 
 
 def patch_spacy() -> None:
@@ -80,6 +86,48 @@ def patch_spacy() -> None:
 
         ns_utils.get_spacy_model = get_spacy_model
         _spacy_patched = True
+
+
+def patch_video_model() -> None:
+    """Run V-JEPA 2 in float16, with its frames resized on the GPU.
+
+    neuralset runs TRIBE's video model, V-JEPA 2 ViT-g, in float32 and resizes
+    each step's 64 frames on the CPU. In float32, attention cannot use the
+    fused tensor-core kernels, so a step's forward pass took 1.57 s on an
+    L40S; under float16 autocast it takes 0.30 s, and token-averaged
+    features, the ones TRIBE uses, stay within 0.31 % of float32 (relative
+    error on a test clip). bfloat16, with 3 fewer mantissa bits, drifted 8 %.
+    A step whose activations overflow float16 runs again in float32.
+    """
+    global _video_patched
+    with _video_lock:
+        if _video_patched:
+            return
+        import torch
+        from neuralset.extractors import video as ns_video
+
+        original = ns_video._HFVideoModel.predict
+
+        def predict(self: Any, images: Any, audio: Any = None) -> Any:
+            device = self.model.device
+            if "vjepa2" not in self.model_name or device.type != "cuda":
+                return original(self, images, audio)
+            inputs = self.processor(
+                videos=list(images), return_tensors="pt", device=device
+            )
+            ns_video._fix_pixel_values(inputs)
+            inputs = inputs.to(device)
+            with torch.inference_mode():
+                with torch.autocast("cuda", dtype=torch.float16):
+                    pred = self.model(**inputs)
+                if not all(bool(torch.isfinite(h).all()) for h in pred.hidden_states):
+                    logger.warning("V-JEPA 2 overflowed float16; rerunning in float32")
+                    pred = self.model(**inputs)
+            pred.hidden_states = tuple(h.float() for h in pred.hidden_states)
+            return pred
+
+        ns_video._HFVideoModel.predict = predict
+        _video_patched = True
 
 
 class TribeBrain:
@@ -114,6 +162,8 @@ class TribeBrain:
         with self._lock:
             if self._model is None:
                 patch_spacy()
+                patch_video_model()
+                allow_tensor_cores()
                 from tribev2.demo_utils import TribeModel
 
                 started = time.perf_counter()
@@ -263,6 +313,20 @@ def _annotate_text(with_words: Any, without_words: Any, language: str | None) ->
             language,
         )
         return standardize_events(without_words)
+
+
+def allow_tensor_cores() -> None:
+    """Run float32 matrix products on TF32 tensor cores.
+
+    TRIBE's audio model runs in float32, as does V-JEPA 2 on a step that
+    overflows float16, and PyTorch leaves tensor cores off for float32 by
+    default. TF32 keeps float32's range with a 10-bit mantissa. With V-JEPA 2
+    in TF32 instead of float32, a test clip's predicted responses matched at
+    r = 0.999998, as close as two GPU types agree in float32.
+    """
+    import torch
+
+    torch.set_float32_matmul_precision("high")
 
 
 @contextmanager
