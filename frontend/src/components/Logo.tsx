@@ -39,7 +39,7 @@ export function Logo({ className }: LogoProps) {
       {/* Phones show the mark alone; the link carries the name. */}
       <span className="hidden flex-col leading-none sm:flex">
         <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap text-foreground">
-          Neuro Validator
+          AdCortex
         </span>
         <span className="mt-1 font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase">
           Brain response lab
