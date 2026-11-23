@@ -49,7 +49,7 @@ Share links keep working for people without the password.
 |---|---|---|
 | `web`: API and app | 1 CPU container, 64 requests at once | stops after 5 idle minutes; restores from a memory snapshot |
 | `orchestrate`: one analysis, report, or comparison | 2 CPUs per job, up to 8 jobs | one job |
-| `BrainWorker`: TRIBE v2 and WhisperX | 1 GPU (L4 by default) | stops after 10 idle minutes |
+| `BrainWorker`: TRIBE v2 and WhisperX | 1 GPU (L40S by default), 8 CPU cores, 16 GiB | stops after 10 idle minutes |
 
 Opening the upload page starts the GPU worker, so the models are loading
 while you pick a file. Jobs wait in line for the single GPU container.
@@ -66,10 +66,11 @@ settings the deployment decides itself: `ADCORTEX_RUNTIME`, `ADCORTEX_BRAIN_BACK
 `ADCORTEX_DATA_DIR`, `ADCORTEX_FRONTEND_DIST`, `ADCORTEX_MODELS_DIR`, `ADCORTEX_WHISPERX_PYTHON`,
 `ADCORTEX_REPLAY_FIXTURE`, and `ADCORTEX_CORS_ORIGINS`. Deploy again after editing `.env`.
 
-Choose the GPU when deploying:
+Choose the GPU when deploying. The default L40S analyzes a 60 s video in
+about 2.5 minutes once warm; [benchmarks.md](benchmarks.md) compares GPUs.
 
 ```sh
-ADCORTEX_GPU=L40S make deploy
+ADCORTEX_GPU=L4 make deploy
 ```
 
 A comma-separated list sets fallbacks in order of preference, so a job never
@@ -81,10 +82,12 @@ marks GPU snapshots as alpha.
 
 ## Costs
 
-You pay for GPU time while the worker runs, including its 10 idle minutes.
-At Modal's November 2026 list prices, an L4 costs $0.80 per hour and an L40S
-$1.95 per hour, so the 10 idle minutes after the last job cost $0.13 on an L4.
-CPU time for the web app and jobs costs a small fraction of the GPU time.
+You pay for the GPU worker while it runs, including its 10 idle minutes:
+the GPU plus its 8 reserved CPU cores and 16 GiB of RAM. At Modal's November
+2026 list prices that is $2.46 per hour with an L40S ($1.95 for the GPU) and
+$1.31 per hour with an L4 ($0.80), so the 10 idle minutes after the last job
+cost $0.41 on an L40S. A 60 s video takes about 2.5 minutes of worker time.
+The web app and the CPU jobs cost a small fraction of the GPU worker.
 
 ## Operate
 

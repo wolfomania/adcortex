@@ -74,9 +74,11 @@ Set `ADCORTEX_PASSWORD`: without it, anyone who finds the app's URL can run
 analyses on your GPU and read or delete every analysis.
 
 The first deploy downloads about 20 GB of models into a Modal Volume and
-builds the images; later deploys reuse both. The GPU worker (an L4 by
-default, $0.80 per hour) runs only while there is work and for 10 idle
-minutes after. `ADCORTEX_GPU=L40S make deploy` picks a faster GPU ($1.95 per hour).
+builds the images; later deploys reuse both. The GPU worker, an L40S by
+default ($2.46 per hour with its CPU and RAM), runs only while there is work
+and for 10 idle minutes after. Once warm, it analyzes a 60 s video in about
+2.5 minutes. `ADCORTEX_GPU=L4 make deploy` picks a GPU that costs about half
+as much per hour and takes about 4.5 minutes ([benchmarks](docs/benchmarks.md)).
 See [docs/deploy.md](docs/deploy.md) for the details, costs, and operations.
 
 ## Configuration

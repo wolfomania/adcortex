@@ -19,7 +19,7 @@ flowchart LR
     subgraph modal["Modal app: adcortex"]
         web["web<br/>FastAPI: API + built app<br/>1 container, 64 requests at once"]
         orchestrate["orchestrate<br/>one job per call<br/>2 CPUs, up to 8 jobs at once"]
-        worker["BrainWorker<br/>TRIBE v2 + WhisperX<br/>1 GPU (L4); jobs queue"]
+        worker["BrainWorker<br/>TRIBE v2 + WhisperX<br/>1 GPU (L40S); jobs queue"]
         data[("Volume adcortex-data<br/>analyses, media, keys")]
         progress[("Dict adcortex-progress<br/>live progress")]
         models[("Volume adcortex-models<br/>model weights")]

@@ -52,7 +52,13 @@ def gpu_choice(value: str) -> str | list[str]:
 # `ADCORTEX_GPU=L40S make deploy` picks another GPU; see docs/deploy.md for costs.
 # With a list, `ADCORTEX_GPU=L40S,A100-80GB`, Modal takes the first type it has
 # capacity for, so a job never waits on one sold-out type.
-GPU = gpu_choice(os.environ.get("ADCORTEX_GPU", "L4"))
+GPU = gpu_choice(os.environ.get("ADCORTEX_GPU", "L40S"))
+# Without a reservation an L4 worker once got a single CPU core, and
+# transcription took 5 minutes instead of 20 s. WhisperX, spaCy, frame
+# decoding, and TRIBE's data loader all need the CPU. The worker holds
+# about 8 GB of RAM between jobs.
+BRAIN_CPU = 8.0
+BRAIN_MEMORY_MB = 16 * 1024
 # Restores the GPU worker from a GPU memory snapshot (alpha on Modal).
 GPU_SNAPSHOT = os.environ.get("ADCORTEX_GPU_SNAPSHOT") == "1"
 # TRIBE caches each job's features on the GPU worker's disk. Past this size,
@@ -284,6 +290,8 @@ def orchestrate(payload: dict[str, Any]) -> None:
 @app.cls(
     image=gpu_image,
     gpu=GPU,
+    cpu=BRAIN_CPU,
+    memory=BRAIN_MEMORY_MB,
     volumes={str(MODELS): models_volume},
     secrets=[env_secret],
     # One GPU at a time keeps the bill bounded; jobs queue behind it.
