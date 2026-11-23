@@ -5,7 +5,7 @@ MODAL := $(UV) modal
 DEPLOY := deploy/modal_app.py
 ENV_FLAG := $(if $(wildcard .env),--env-file .env,)
 
-.PHONY: help install dev dev-api dev-web dev-ui test lint prefetch deploy stop logs
+.PHONY: help install dev dev-api dev-web dev-ui test lint prefetch deploy stop logs baseline
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "} {printf "  %-9s %s\n", $$1, $$2}'
@@ -46,3 +46,6 @@ stop: ## Stop the deployed app (data stays in its Volume)
 
 logs: ## Follow the deployed app's logs
 	$(MODAL) app logs adcortex --follow
+
+baseline: ## Rebuild the reference baseline from baseline/sources.yaml on Modal
+	$(UV) python scripts/build_baseline.py

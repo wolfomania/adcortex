@@ -9,6 +9,7 @@ import pytest
 from modal import exception as modal_errors
 from pydantic import ValidationError
 
+from adcortex.analysis.baseline import Baseline
 from adcortex.brain.base import BrainPrediction, BrainRequest
 from adcortex.brain.client import BrainJob, InProcessBrain
 from adcortex.brain.remote import ModalBrainClient
@@ -244,3 +245,18 @@ def test_local_services_use_the_data_folder(tmp_path: Path) -> None:
     assert (tmp_path / "analyses" / ID / AUDIO).read_bytes() == b"x"
     assert services.brain.name == "mock"
     assert services.llm is None
+
+
+def test_only_tribe_output_is_scored_against_the_reference_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    reference = Baseline.build(
+        version="test", description="d", systems={}, hook=(), n_clips=1
+    )
+    monkeypatch.setattr("adcortex.pipeline.services.load_baseline", lambda: reference)
+
+    mock = create_services(Settings(data_dir=tmp_path, brain_backend="mock"))
+    replay = create_services(Settings(data_dir=tmp_path, brain_backend="replay"))
+
+    assert mock.baseline is None
+    assert replay.baseline is reference

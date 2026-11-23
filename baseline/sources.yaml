@@ -1,0 +1,28 @@
+# Reference clips for backend/src/adcortex/data/baseline_v1.json.
+# `make baseline` analyzes each clip on the deployed app and pools the
+# predictions. Each clip needs a `url` or a local `path` (relative to the
+# repository root), and its license. `start` and `end`, in seconds, cut a
+# segment from a longer file.
+version: v1
+description: 5 public-domain TV commercials from the Prelinger Archives
+clips:
+  - id: kodak_instamatic
+    title: Kodak Instamatic Commercial
+    url: https://archive.org/download/kodak_instamatic/kodak_instamatic.mp4
+    license: Public domain (Prelinger Archives, archive.org/details/kodak_instamatic)
+  - id: cheerios_v8
+    title: Cheerios/V-8 (1960)
+    url: https://archive.org/download/Cheerios1960/Cheerios1960.mp4
+    license: Public domain (Prelinger Archives, archive.org/details/Cheerios1960)
+  - id: amc_jeep
+    title: AMC Jeep Commercial
+    url: https://archive.org/download/amc_jeep/amc_jeep.mp4
+    license: Public domain (Prelinger Archives, archive.org/details/amc_jeep)
+  - id: ivory_soap
+    title: Ivory Soap Commercial
+    url: https://archive.org/download/ivory_soap/ivory_soap.mp4
+    license: Public domain (Prelinger Archives, archive.org/details/ivory_soap)
+  - id: sharp_calculator
+    title: Sharp ELSI-8 Calculator Commercial
+    url: https://archive.org/download/sharp_calculator_2/sharp_calculator_2.mp4
+    license: Public domain (Prelinger Archives, archive.org/details/sharp_calculator_2)

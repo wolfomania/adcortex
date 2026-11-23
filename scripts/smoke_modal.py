@@ -198,7 +198,7 @@ def run(client: httpx.Client, path: Path, timeout_s: float) -> bool:
     return not found
 
 
-def _password() -> str | None:
+def password() -> str | None:
     return os.environ.get("ADCORTEX_PASSWORD") or dotenv_values(ROOT / ".env").get(
         "ADCORTEX_PASSWORD"
     )
@@ -220,7 +220,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     timeout = httpx.Timeout(60.0, write=600.0)
     with httpx.Client(base_url=args.url, timeout=timeout) as client:
         try:
-            login(client, _password())
+            login(client, password())
         except SmokeError as exc:
             print(f"FAIL {exc}")
             return 1

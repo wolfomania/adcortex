@@ -59,7 +59,7 @@ def analyze(
     applicable = [
         s.id for s in catalog.systems if inputs.kind is MediaKind.VIDEO or not s.visual
     ]
-    z = {sid: _zscore(curve, sid, baseline) for sid, curve in raw.items()}
+    z = {sid: zscore(curve, sid, baseline) for sid, curve in raw.items()}
     raw_means = {sid: _nanmean(curve) for sid, curve in raw.items()}
     percentiles = {
         sid: _percentile(sid, raw_means[sid], baseline) if sid in applicable else None
@@ -113,7 +113,8 @@ def analyze(
     return AnalysisOutput(result=result, frames=frames, summary=summary)
 
 
-def _zscore(curve: Curve, system_id: str, baseline: Baseline | None) -> Curve:
+def zscore(curve: Curve, system_id: str, baseline: Baseline | None) -> Curve:
+    """Z-scores against the baseline, or against the clip itself without one."""
     stats = baseline.systems.get(system_id) if baseline else None
     if stats is not None and stats.std > 0:
         return (curve - stats.mean) / stats.std

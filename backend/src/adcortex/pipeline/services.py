@@ -63,5 +63,6 @@ def create_services(
         llm=load_llm(settings),
         catalog=load_systems(),
         atlas=load_atlas(),
-        baseline=load_baseline(),
+        # The baseline describes TRIBE v2 output; mock curves have their own scale.
+        baseline=None if settings.brain_backend == "mock" else load_baseline(),
     )
