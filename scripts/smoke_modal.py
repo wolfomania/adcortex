@@ -13,10 +13,10 @@ It prints each run's wall time and stage timings, which docs/benchmarks.md
 records. The kind follows the extension: video (.mp4, .mov, .m4v, .webm,
 .mkv), audio (.mp3, .wav, .m4a, .aac, .ogg, .flac), or a script to read
 aloud (.txt). An identical file reuses its earlier prediction (the summary
-says "reused"), so time each run with a different file.
+says "reused"), so time each run with a different file. Pass the URL that
+`make deploy` prints:
 
-    uv run --project backend python scripts/smoke_modal.py \\
-        --url https://<workspace>--neuromarketing-web.modal.run \\
+    uv run --project backend python scripts/smoke_modal.py --url <URL> \\
         clips/spot-10s.mp4 clips/radio-30s.mp3 clips/script.txt
 
 When the app asks for a password, the script reads NM_PASSWORD from the

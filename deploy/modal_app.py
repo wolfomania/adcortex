@@ -290,6 +290,8 @@ class BrainWorker:
 def prefetch_models(force: bool = False) -> None:
     """Download every model the GPU worker loads into the Volume `nm-models`."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    # The Hub client logs every HTTP request at INFO: thousands of lines.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     if PREFETCHED.exists() and not force:
         log.info("Models are in place (%s). Pass --force to refresh.", PREFETCHED)
         return

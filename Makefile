@@ -45,4 +45,4 @@ stop: ## Stop the deployed app (data stays in its Volume)
 	$(MODAL) app stop neuromarketing
 
 logs: ## Follow the deployed app's logs
-	$(MODAL) app logs neuromarketing
+	$(MODAL) app logs neuromarketing --follow
