@@ -56,8 +56,10 @@ or the real model on a local GPU (`ADCORTEX_BRAIN_BACKEND`).
    the report model. Audio becomes a preview and a 16 kHz WAV. A script is
    first read aloud with gTTS, then handled as audio.
 3. **Predict** (`pipeline/predict.py`). The GPU worker transcribes the speech
-   with WhisperX and runs TRIBE v2. Identical input (same SHA-256) reuses the
-   finished prediction of an earlier analysis instead.
+   with WhisperX and runs TRIBE v2, with its video model in float16 and each
+   video frame decoded once ([benchmarks](benchmarks.md)). Identical input
+   (same SHA-256) reuses the finished prediction of an earlier analysis
+   instead.
 4. **Measure** (`pipeline/measure.py`). CPU code turns the prediction into
    system curves, scores, moments, per-scene statistics, library percentiles,
    and the per-second brain maps (`analysis/`).

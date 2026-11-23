@@ -26,7 +26,7 @@ sales.
    prediction whose segment starts in [*k*, *k* + 1). Seconds the model skipped
    stay empty instead of shifting later seconds (`analysis/curves.py`).
 
-The wrapper around TRIBE v2 changes three things in its reference pipeline:
+The wrapper around TRIBE v2 changes four things in its reference pipeline:
 
 - **Word placement.** For audio longer than 90 s, TRIBE shifts every word by
   every chunk's start, which misplaces and duplicates the transcript. Here each
@@ -37,6 +37,12 @@ The wrapper around TRIBE v2 changes three things in its reference pipeline:
 - **Sentence splitting.** Languages without a dedicated spaCy pipeline use the
   multilingual splitter. If text annotation still fails, the prediction uses
   the video and audio features only.
+- **Speed.** V-JEPA 2, the video model, runs in float16 with its frames
+  resized on the GPU, and each video frame is decoded once although
+  consecutive 4 s windows overlap (`brain/tribe.py`, `brain/frames.py`). A
+  video step takes 0.77 s instead of 2.84 s on an L40S. The predictions match
+  float32 at r = 0.999998, as closely as two GPU types running float32 agree
+  ([benchmarks](benchmarks.md)).
 
 ## Ten brain systems
 

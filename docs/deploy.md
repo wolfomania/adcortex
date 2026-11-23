@@ -53,6 +53,9 @@ Share links keep working for people without the password.
 
 Opening the upload page starts the GPU worker, so the models are loading
 while you pick a file. Jobs wait in line for the single GPU container.
+The worker keeps TRIBE's feature cache on its disk between jobs. Once the
+cache passes 20 GiB, or half the disk that was free at start, the worker
+stops after its current job, and the next job starts a fresh container.
 
 Data lives in Modal storage that the backend creates on first use:
 
