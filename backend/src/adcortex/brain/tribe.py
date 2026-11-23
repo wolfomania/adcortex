@@ -2,8 +2,8 @@
 
 TRIBE v2 (d'Ascoli et al., 2026, arXiv:2605.04326; CC BY-NC 4.0) predicts
 fMRI responses on the fsaverage5 cortical mesh from video (V-JEPA 2), audio
-(Wav2Vec-BERT) and text (Llama 3.2) features. This wrapper follows the
-pipeline of `TribeModel.get_events_dataframe` with three changes:
+(Wav2Vec-BERT) and text (Llama 3.2) features. This wrapper follows TRIBE's
+reference pipeline (`TribeModel.get_events_dataframe`) with four changes:
 
 1. Word placement. TRIBE splits audio longer than 90 s into 30-60 s chunks,
    then shifts every word by every chunk's start + offset, which misplaces
@@ -149,9 +149,9 @@ def patch_frame_reader() -> None:
         original = FFMPEG_VideoReader.get_frame
 
         def get_frame(self: Any, t: float) -> Any:
-            cache = self.__dict__.get("_nm_frames")
+            cache = self.__dict__.get("_adcortex_frames")
             if cache is None:
-                cache = self._nm_frames = FrameCache(cache_capacity(self.fps))
+                cache = self._adcortex_frames = FrameCache(cache_capacity(self.fps))
             return read_frame_at(self, t, cache, lambda at: original(self, at))
 
         FFMPEG_VideoReader.get_frame = get_frame
