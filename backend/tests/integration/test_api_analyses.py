@@ -5,18 +5,18 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import AppContext
-from neuromarketing.api.warmup import WarmupGate
-from neuromarketing.domain.models import (
+from adcortex.api.app import create_app
+from adcortex.api.context import AppContext
+from adcortex.api.warmup import WarmupGate
+from adcortex.domain.models import (
     Job,
     MediaKind,
     Progress,
     Status,
     utcnow,
 )
-from neuromarketing.jobs.monitor import DEAD_JOB
-from neuromarketing.storage.repository import AnalysisRepository
+from adcortex.jobs.monitor import DEAD_JOB
+from adcortex.storage.repository import AnalysisRepository
 from tests.integration.conftest import START, FakeDispatcher, seed, with_llm
 
 MISSING = "20261122-120000-abcdef"

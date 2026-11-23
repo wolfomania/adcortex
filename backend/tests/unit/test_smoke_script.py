@@ -17,7 +17,7 @@ SCRIPT = Path(__file__).resolve().parents[3] / "scripts" / "smoke_modal.py"
 @pytest.fixture(scope="module")
 def smoke() -> Iterator[ModuleType]:
     with pytest.MonkeyPatch.context() as patch:
-        spec = importlib.util.spec_from_file_location("nm_smoke_modal", SCRIPT)
+        spec = importlib.util.spec_from_file_location("adcortex_smoke_modal", SCRIPT)
         assert spec is not None
         assert spec.loader is not None
         module = importlib.util.module_from_spec(spec)

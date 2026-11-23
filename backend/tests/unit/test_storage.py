@@ -5,12 +5,12 @@ from pathlib import Path
 import modal
 import pytest
 
-from neuromarketing.config import Settings
-from neuromarketing.domain.models import Progress, Status
-from neuromarketing.storage.base import ArtifactStore, ProgressStore
-from neuromarketing.storage.factory import create_storage
-from neuromarketing.storage.local import LocalFsStore, MemoryProgressStore
-from neuromarketing.storage.modal_store import ModalDictProgressStore, ModalVolumeStore
+from adcortex.config import Settings
+from adcortex.domain.models import Progress, Status
+from adcortex.storage.base import ArtifactStore, ProgressStore
+from adcortex.storage.factory import create_storage
+from adcortex.storage.local import LocalFsStore, MemoryProgressStore
+from adcortex.storage.modal_store import ModalDictProgressStore, ModalVolumeStore
 from tests.fakes import FakeDict, FakeVolume
 
 # ── artifact stores: one contract, two backends ────────────────────────────

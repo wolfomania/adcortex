@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from neuromarketing.brain import whisperx_runner as runner
+from adcortex.brain import whisperx_runner as runner
 
 
 def test_interpolated_words_share_the_segment_by_length() -> None:

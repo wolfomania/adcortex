@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from neuromarketing.brain.frames import (
+from adcortex.brain.frames import (
     MAX_CACHED_FRAMES,
     FrameCache,
     cache_capacity,

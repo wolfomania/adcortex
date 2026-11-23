@@ -28,14 +28,14 @@ from pydantic_ai.messages import (
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 from pydantic_ai.models.test import TestModel
 
-from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
-from neuromarketing.analysis.baseline import Baseline, SystemStats
-from neuromarketing.analysis.run import AnalysisInputs, analyze
-from neuromarketing.analysis.systems import load_systems
-from neuromarketing.brain.base import BrainPrediction
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import ConfigurationError
-from neuromarketing.domain.models import (
+from adcortex.analysis.atlas import N_VERTICES, load_atlas
+from adcortex.analysis.baseline import Baseline, SystemStats
+from adcortex.analysis.run import AnalysisInputs, analyze
+from adcortex.analysis.systems import load_systems
+from adcortex.brain.base import BrainPrediction
+from adcortex.config import Settings
+from adcortex.domain.errors import ConfigurationError
+from adcortex.domain.models import (
     AnalysisMeta,
     AnalysisResult,
     LanguageInfo,
@@ -44,16 +44,16 @@ from neuromarketing.domain.models import (
     SourceFile,
     Word,
 )
-from neuromarketing.llm.client import (
+from adcortex.llm.client import (
     LlmConfig,
     backoff_delay,
     describe_failure,
     load_llm,
     run_sync,
 )
-from neuromarketing.llm.compare import write_comparison
-from neuromarketing.llm.prompts import report_brief
-from neuromarketing.llm.report import (
+from adcortex.llm.compare import write_comparison
+from adcortex.llm.prompts import report_brief
+from adcortex.llm.report import (
     ReportMedia,
     ReportRequest,
     choose_input_mode,

@@ -18,7 +18,7 @@ dev: ## Run the API (mock brain) and the app with hot reload on :5173
 	$(MAKE) -j2 dev-api dev-web
 
 dev-api:
-	$(UV) $(ENV_FLAG) uvicorn --factory neuromarketing.api.app:create_app --reload --reload-dir backend/src --port 8000
+	$(UV) $(ENV_FLAG) uvicorn --factory adcortex.api.app:create_app --reload --reload-dir backend/src --port 8000
 
 dev-web:
 	pnpm --dir frontend dev:backend
@@ -42,7 +42,7 @@ deploy: prefetch ## Deploy to Modal with the settings and keys in .env
 	$(MODAL) deploy $(DEPLOY)
 
 stop: ## Stop the deployed app (data stays in its Volume)
-	$(MODAL) app stop neuromarketing
+	$(MODAL) app stop adcortex
 
 logs: ## Follow the deployed app's logs
-	$(MODAL) app logs neuromarketing --follow
+	$(MODAL) app logs adcortex --follow

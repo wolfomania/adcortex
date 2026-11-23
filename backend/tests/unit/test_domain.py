@@ -4,14 +4,14 @@ from datetime import UTC, datetime
 
 import pytest
 
-from neuromarketing.domain.errors import InvalidInputError, NotFoundError
-from neuromarketing.domain.ids import (
+from adcortex.domain.errors import InvalidInputError, NotFoundError
+from adcortex.domain.ids import (
     is_analysis_id,
     new_analysis_id,
     require_analysis_id,
 )
-from neuromarketing.domain.languages import is_fully_supported, normalize_language
-from neuromarketing.domain.models import Status
+from adcortex.domain.languages import is_fully_supported, normalize_language
+from adcortex.domain.models import Status
 
 
 def test_new_id_is_sortable_and_valid() -> None:

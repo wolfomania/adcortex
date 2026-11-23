@@ -3,13 +3,13 @@
 // The API returns system ids, labels, and confidence with every result, but
 // not the descriptions, parcels, or citations that explain them. Until the
 // API exposes the catalog, the app ships this generated copy of
-// backend/src/neuromarketing/data/systems.yaml. Refresh it with
+// backend/src/adcortex/data/systems.yaml. Refresh it with
 // `pnpm gen:catalog`.
 import { readFile, writeFile } from 'node:fs/promises'
 
 import { parse } from 'yaml'
 
-const SOURCE = new URL('../../backend/src/neuromarketing/data/systems.yaml', import.meta.url)
+const SOURCE = new URL('../../backend/src/adcortex/data/systems.yaml', import.meta.url)
 const OUTPUT = new URL('../src/features/systems/catalog.json', import.meta.url)
 
 /** Reduce the YAML document to what the UI shows. */

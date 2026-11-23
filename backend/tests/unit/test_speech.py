@@ -6,10 +6,10 @@ from typing import Any
 import pytest
 from gtts.tts import gTTSError
 
-from neuromarketing.domain.errors import InvalidInputError, PipelineError
-from neuromarketing.domain.languages import LANGUAGES
-from neuromarketing.media import speech
-from neuromarketing.media.speech import can_speak, speech_language, synthesize_speech
+from adcortex.domain.errors import InvalidInputError, PipelineError
+from adcortex.domain.languages import LANGUAGES
+from adcortex.media import speech
+from adcortex.media.speech import can_speak, speech_language, synthesize_speech
 
 
 class FakeTTS:

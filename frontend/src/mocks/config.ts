@@ -1,7 +1,7 @@
 // Static parts of the mock backend's configuration.
 import type { LanguageOption, Limits } from '@/api/types'
 
-/** The backend's defaults (backend/src/neuromarketing/config.py). */
+/** The backend's defaults (backend/src/adcortex/config.py). */
 export const MOCK_LIMITS: Limits = {
   min_duration_s: 3,
   max_duration_s: 180,

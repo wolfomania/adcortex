@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from neuromarketing.brain.transcript import (
+from adcortex.brain.transcript import (
     RUNNER_SCRIPT,
     AudioChunk,
     TranscriptWord,
@@ -15,7 +15,7 @@ from neuromarketing.brain.transcript import (
     to_domain_words,
     tribe_language,
 )
-from neuromarketing.domain.errors import PipelineError
+from adcortex.domain.errors import PipelineError
 
 
 def _word(text: str, start: float, end: float, seq: int = 0) -> TranscriptWord:

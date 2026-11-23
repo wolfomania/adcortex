@@ -4,14 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from neuromarketing.domain.errors import MediaError
-from neuromarketing.domain.models import MediaInfo, MediaKind
-from neuromarketing.media import probe as probe_mod
-from neuromarketing.media.envelope import audio_envelope
-from neuromarketing.media.probe import kind_for_extension, probe, validate_media
-from neuromarketing.media.scenes import build_scenes, detect_cuts, uniform_segments
-from neuromarketing.media.thumbnails import extract_keyframes, extract_strip
-from neuromarketing.media.transcode import (
+from adcortex.domain.errors import MediaError
+from adcortex.domain.models import MediaInfo, MediaKind
+from adcortex.media import probe as probe_mod
+from adcortex.media.envelope import audio_envelope
+from adcortex.media.probe import kind_for_extension, probe, validate_media
+from adcortex.media.scenes import build_scenes, detect_cuts, uniform_segments
+from adcortex.media.thumbnails import extract_keyframes, extract_strip
+from adcortex.media.transcode import (
     make_audio_preview,
     make_llm_video,
     make_video_preview,

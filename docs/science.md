@@ -13,7 +13,7 @@ sales.
 ## From a clip to a cortical response
 
 1. **Prepare the media.** ffmpeg converts the upload into model inputs, finds
-   scene cuts (`scdet`), and extracts keyframes (`backend/src/neuromarketing/media/`).
+   scene cuts (`scdet`), and extracts keyframes (`backend/src/adcortex/media/`).
    A script is first read aloud with gTTS, so the model hears it the way it
    would hear a voice-over.
 2. **Transcribe.** WhisperX transcribes the speech with word timings and
@@ -44,7 +44,7 @@ A vertex-level map is hard to read, so the app summarizes it as ten systems.
 Each system is a set of areas from the HCP-MMP1.0 parcellation (Glasser et al.,
 2016), projected onto the same fsaverage5 mesh. A system's response at second
 *k* is the mean prediction over the vertices of its areas in both hemispheres.
-The definitions live in `backend/src/neuromarketing/data/systems.yaml`.
+The definitions live in `backend/src/adcortex/data/systems.yaml`.
 
 | System | HCP-MMP1.0 areas | What it tracks | Confidence |
 |---|---|---|---|
@@ -99,7 +99,7 @@ construction. Response index, Hook, Sustain, and the reference percentiles
 are then unavailable, and the systems are ranked by their strongest second
 instead. The repository does not ship a
 reference library yet; a deployment runs in this mode until one is added as
-`backend/src/neuromarketing/data/baseline_v1.json`.
+`backend/src/adcortex/data/baseline_v1.json`.
 
 ## Scores
 
@@ -131,12 +131,12 @@ Moments are the clearest peaks and dips in the system curves
 ## The written report
 
 The report is optional: the metrics stand without it. A language model chosen
-with `NM_LLM_MODEL` (any model Pydantic AI supports) reads a brief of the
+with `ADCORTEX_LLM_MODEL` (any model Pydantic AI supports) reads a brief of the
 metrics: scores, systems with their confidence, moments, scenes, and the
 transcript (`llm/prompts.py`). It also receives the richest media the model
 accepts (`llm/report.py`):
 
-- With `NM_LLM_MEDIA=video`, a small proxy of the clip (or, for audio, the
+- With `ADCORTEX_LLM_MEDIA=video`, a small proxy of the clip (or, for audio, the
   sound), up to 18 MB. A model that does not accept it gets keyframes instead.
 - With `keyframes`, up to 16 scene keyframes.
 - With `text`, the metrics only.
@@ -173,7 +173,7 @@ back to the model to correct.
   accepts the Llama 3.2 Community License.
 - **HCP-MMP1.0** data are redistributed under the WU-Minn HCP Open Access Data
   Use Terms. The required acknowledgment is in
-  `backend/src/neuromarketing/data/README.md`.
+  `backend/src/adcortex/data/README.md`.
 - The other models TRIBE v2 uses (V-JEPA 2, Wav2Vec-BERT 2.0, and DINOv2) and
   WhisperX's transcription and alignment models carry their own licenses; read
   their model cards before any commercial use.

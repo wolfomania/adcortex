@@ -5,12 +5,12 @@ import math
 import numpy as np
 import pytest
 
-from neuromarketing.analysis.baseline import Baseline, SystemStats, percentile_of
-from neuromarketing.analysis.curves import system_curves, to_grid
-from neuromarketing.analysis.frames import brain_frames
-from neuromarketing.analysis.moments import find_peaks
-from neuromarketing.brain.base import BrainPrediction
-from neuromarketing.domain.models import Word
+from adcortex.analysis.baseline import Baseline, SystemStats, percentile_of
+from adcortex.analysis.curves import system_curves, to_grid
+from adcortex.analysis.frames import brain_frames
+from adcortex.analysis.moments import find_peaks
+from adcortex.brain.base import BrainPrediction
+from adcortex.domain.models import Word
 
 # ── grid ───────────────────────────────────────────────────────────────────
 

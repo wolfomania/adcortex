@@ -3,7 +3,7 @@
 import type { AppConfig } from '@/api/types'
 
 export interface Scenario {
-  /** NM_PASSWORD is set: log in with MOCK_PASSWORD. */
+  /** ADCORTEX_PASSWORD is set: log in with MOCK_PASSWORD. */
   password: boolean
   /** A report model is configured. */
   llm: boolean

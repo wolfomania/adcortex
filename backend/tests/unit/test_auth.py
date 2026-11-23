@@ -6,13 +6,13 @@ from pathlib import Path
 import pytest
 from pydantic import SecretStr
 
-from neuromarketing.auth.keys import KEY_PATH, signing_key
-from neuromarketing.auth.limiter import LoginLimiter
-from neuromarketing.auth.service import SHARE_DAYS, Auth
-from neuromarketing.auth.tokens import TokenSigner
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import RateLimitedError, UnauthorizedError
-from neuromarketing.storage.local import LocalFsStore
+from adcortex.auth.keys import KEY_PATH, signing_key
+from adcortex.auth.limiter import LoginLimiter
+from adcortex.auth.service import SHARE_DAYS, Auth
+from adcortex.auth.tokens import TokenSigner
+from adcortex.config import Settings
+from adcortex.domain.errors import RateLimitedError, UnauthorizedError
+from adcortex.storage.local import LocalFsStore
 
 KEY = b"k" * 32
 ANALYSIS_ID = "20261122-120000-abcdef"

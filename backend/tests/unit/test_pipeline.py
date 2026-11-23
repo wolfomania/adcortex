@@ -15,16 +15,16 @@ from pydantic_ai import BinaryContent
 from pydantic_ai.messages import ModelMessage, ModelResponse
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 
-from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
-from neuromarketing.analysis.library import MIN_LIBRARY
-from neuromarketing.analysis.systems import load_systems
-from neuromarketing.brain.base import BrainPrediction
-from neuromarketing.brain.client import BrainJob, InProcessBrain
-from neuromarketing.brain.mock import MockBrain
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import NotFoundError, PipelineError
-from neuromarketing.domain.ids import new_analysis_id
-from neuromarketing.domain.models import (
+from adcortex.analysis.atlas import N_VERTICES, load_atlas
+from adcortex.analysis.library import MIN_LIBRARY
+from adcortex.analysis.systems import load_systems
+from adcortex.brain.base import BrainPrediction
+from adcortex.brain.client import BrainJob, InProcessBrain
+from adcortex.brain.mock import MockBrain
+from adcortex.config import Settings
+from adcortex.domain.errors import NotFoundError, PipelineError
+from adcortex.domain.ids import new_analysis_id
+from adcortex.domain.models import (
     Analysis,
     AnalysisMeta,
     AnalysisState,
@@ -39,18 +39,18 @@ from neuromarketing.domain.models import (
     SourceFile,
     Status,
 )
-from neuromarketing.llm.client import LlmConfig, MediaLevel
-from neuromarketing.media.speech import synthesize_speech
-from neuromarketing.pipeline.interpret import report_inputs
-from neuromarketing.pipeline.runner import (
+from adcortex.llm.client import LlmConfig, MediaLevel
+from adcortex.media.speech import synthesize_speech
+from adcortex.pipeline.interpret import report_inputs
+from adcortex.pipeline.runner import (
     GENERIC_FAILURE,
     compare_key,
     make_runner,
     run_job,
 )
-from neuromarketing.pipeline.services import Services
-from neuromarketing.storage.local import LocalFsStore, MemoryProgressStore
-from neuromarketing.storage.repository import (
+from adcortex.pipeline.services import Services
+from adcortex.storage.local import LocalFsStore, MemoryProgressStore
+from adcortex.storage.repository import (
     AUDIO,
     FRAMES,
     LLM_VIDEO,

@@ -3,13 +3,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
-from neuromarketing.analysis.baseline import Baseline, SystemStats
-from neuromarketing.analysis.library import apply_library, library_percentiles
-from neuromarketing.analysis.run import AnalysisInputs, AnalysisOutput, analyze
-from neuromarketing.analysis.systems import load_systems
-from neuromarketing.brain.base import BrainPrediction
-from neuromarketing.domain.models import LanguageInfo, MediaKind, Scene
+from adcortex.analysis.atlas import N_VERTICES, load_atlas
+from adcortex.analysis.baseline import Baseline, SystemStats
+from adcortex.analysis.library import apply_library, library_percentiles
+from adcortex.analysis.run import AnalysisInputs, AnalysisOutput, analyze
+from adcortex.analysis.systems import load_systems
+from adcortex.brain.base import BrainPrediction
+from adcortex.domain.models import LanguageInfo, MediaKind, Scene
 
 DURATION = 12.4
 

@@ -10,8 +10,8 @@ import { createHandlers } from './handlers'
 import { parseScenario } from './scenario'
 import { isMockState, seedState, type MockState } from './state'
 
-const SCENARIO_KEY = 'nm-mock-scenario'
-const STATE_KEY = 'nm-mock-state'
+const SCENARIO_KEY = 'adcortex-mock-scenario'
+const STATE_KEY = 'adcortex-mock-state'
 
 function readStorage(key: string): string | null {
   try {

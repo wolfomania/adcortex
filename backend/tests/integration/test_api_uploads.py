@@ -8,12 +8,12 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import build_context
-from neuromarketing.config import Settings
-from neuromarketing.domain.models import Job
-from neuromarketing.pipeline.services import create_services
-from neuromarketing.storage.repository import SCRIPT, AnalysisRepository
+from adcortex.api.app import create_app
+from adcortex.api.context import build_context
+from adcortex.config import Settings
+from adcortex.domain.models import Job
+from adcortex.pipeline.services import create_services
+from adcortex.storage.repository import SCRIPT, AnalysisRepository
 from tests.integration.conftest import FakeDispatcher
 
 pytestmark = pytest.mark.ffmpeg

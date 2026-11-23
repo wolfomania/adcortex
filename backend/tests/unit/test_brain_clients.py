@@ -9,16 +9,16 @@ import pytest
 from modal import exception as modal_errors
 from pydantic import ValidationError
 
-from neuromarketing.brain.base import BrainPrediction, BrainRequest
-from neuromarketing.brain.client import BrainJob, InProcessBrain
-from neuromarketing.brain.remote import ModalBrainClient
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import NotFoundError, PipelineError
-from neuromarketing.domain.models import Status, Word
-from neuromarketing.pipeline.services import create_brain_client, create_services
-from neuromarketing.pipeline.worker import run_brain_job
-from neuromarketing.storage.local import LocalFsStore, MemoryProgressStore
-from neuromarketing.storage.repository import AUDIO, AnalysisRepository
+from adcortex.brain.base import BrainPrediction, BrainRequest
+from adcortex.brain.client import BrainJob, InProcessBrain
+from adcortex.brain.remote import ModalBrainClient
+from adcortex.config import Settings
+from adcortex.domain.errors import NotFoundError, PipelineError
+from adcortex.domain.models import Status, Word
+from adcortex.pipeline.services import create_brain_client, create_services
+from adcortex.pipeline.worker import run_brain_job
+from adcortex.storage.local import LocalFsStore, MemoryProgressStore
+from adcortex.storage.repository import AUDIO, AnalysisRepository
 
 ID = "20261122-120000-abcdef"
 JOB = BrainJob(
@@ -127,7 +127,7 @@ def _client(
         looked_up.append((app_name, class_name))
         return lambda: worker
 
-    return ModalBrainClient("nm-app", lookup=lookup), looked_up, worker
+    return ModalBrainClient("adcortex-app", lookup=lookup), looked_up, worker
 
 
 def test_modal_brain_sends_the_job_and_decodes_the_prediction(
@@ -139,7 +139,7 @@ def test_modal_brain_sends_the_job_and_decodes_the_prediction(
     prediction = client.predict(JOB, tmp_path / "unused.wav")
 
     assert (client.name, client.remote) == ("tribev2", True)
-    assert looked_up == [("nm-app", "BrainWorker")]
+    assert looked_up == [("adcortex-app", "BrainWorker")]
     assert method.calls == [(JOB.model_dump(mode="json"),)]
     assert prediction.words == _prediction().words
     np.testing.assert_array_equal(prediction.preds, _prediction().preds)

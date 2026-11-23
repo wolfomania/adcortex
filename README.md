@@ -1,6 +1,6 @@
-# Neuro-Marketing Validator
+# AdCortex
 
-[![CI](https://github.com/wolfomania/AI-Neuro-Marketing-Validator/actions/workflows/ci.yml/badge.svg)](https://github.com/wolfomania/AI-Neuro-Marketing-Validator/actions/workflows/ci.yml)
+[![CI](https://github.com/wolfomania/adcortex/actions/workflows/ci.yml/badge.svg)](https://github.com/wolfomania/adcortex/actions/workflows/ci.yml)
 
 See how an average viewer's brain would respond to an ad, second by second,
 before you run it.
@@ -47,8 +47,8 @@ You need [uv](https://docs.astral.sh/uv/), Node.js 22.12 or later with pnpm
 (`corepack enable`), and ffmpeg. uv installs Python 3.12 if it is missing.
 
 ```sh
-git clone https://github.com/wolfomania/AI-Neuro-Marketing-Validator.git
-cd AI-Neuro-Marketing-Validator
+git clone https://github.com/wolfomania/adcortex.git
+cd adcortex
 cp .env.example .env
 make install
 make dev
@@ -57,7 +57,7 @@ make dev
 `make dev` starts the API on port 8000 and the app on
 <http://localhost:5173>. Locally the brain is a mock that makes deterministic,
 synthetic responses, so no GPU is needed; everything else is real. To get
-written reports, set `NM_LLM_MODEL` and its key in `.env`.
+written reports, set `ADCORTEX_LLM_MODEL` and its key in `.env`.
 
 To try the interface alone, `make dev-ui` serves the app with a mock API in
 the browser: seeded analyses, reports, and a reference library, without Python
@@ -66,17 +66,17 @@ or ffmpeg. The screenshots on this page come from it.
 ## Deploy on Modal
 
 ```sh
-cp .env.example .env   # set HF_TOKEN and NM_PASSWORD; optionally NM_LLM_MODEL and its key
+cp .env.example .env   # set HF_TOKEN and ADCORTEX_PASSWORD; optionally ADCORTEX_LLM_MODEL and its key
 make deploy
 ```
 
-Set `NM_PASSWORD`: without it, anyone who finds the app's URL can run
+Set `ADCORTEX_PASSWORD`: without it, anyone who finds the app's URL can run
 analyses on your GPU and read or delete every analysis.
 
 The first deploy downloads about 20 GB of models into a Modal Volume and
 builds the images; later deploys reuse both. The GPU worker (an L4 by
 default, $0.80 per hour) runs only while there is work and for 10 idle
-minutes after. `NM_GPU=L40S make deploy` picks a faster GPU ($1.95 per hour).
+minutes after. `ADCORTEX_GPU=L40S make deploy` picks a faster GPU ($1.95 per hour).
 See [docs/deploy.md](docs/deploy.md) for the details, costs, and operations.
 
 ## Configuration
@@ -86,19 +86,19 @@ optional except `HF_TOKEN` for a Modal deployment.
 
 | Setting | Default | What it does |
 |---|---|---|
-| `NM_LLM_MODEL` | none | The report model, such as `google:gemini-4-hydrogen` or `anthropic:claude-opus-5-5`. Empty: no written reports. |
-| `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` | none | The key for the provider in `NM_LLM_MODEL`. |
-| `NM_LLM_MEDIA` | `video` | What the report model sees besides the metrics: `video` (the clip, when the model accepts it), `keyframes` (up to 16 scene frames), or `text` (nothing else). |
-| `NM_LLM_OUTPUT_MODE` | `tool` | How the model returns the report: `tool`, `native`, or `prompted`. |
-| `NM_PASSWORD` | none | Require a login. Share links still work without one. |
-| `NM_SECRET_KEY` | generated | Signs sessions and share links. If empty, a random key is kept in storage. |
-| `NM_SESSION_DAYS` | `30` | How long a login lasts. |
+| `ADCORTEX_LLM_MODEL` | none | The report model, such as `google:gemini-4-hydrogen` or `anthropic:claude-opus-5-5`. Empty: no written reports. |
+| `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` | none | The key for the provider in `ADCORTEX_LLM_MODEL`. |
+| `ADCORTEX_LLM_MEDIA` | `video` | What the report model sees besides the metrics: `video` (the clip, when the model accepts it), `keyframes` (up to 16 scene frames), or `text` (nothing else). |
+| `ADCORTEX_LLM_OUTPUT_MODE` | `tool` | How the model returns the report: `tool`, `native`, or `prompted`. |
+| `ADCORTEX_PASSWORD` | none | Require a login. Share links still work without one. |
+| `ADCORTEX_SECRET_KEY` | generated | Signs sessions and share links. If empty, a random key is kept in storage. |
+| `ADCORTEX_SESSION_DAYS` | `30` | How long a login lasts. |
 | `HF_TOKEN` | none | A Hugging Face token whose account accepted the Llama 3.2 license; Modal uses it to download the models. |
-| `NM_BRAIN_BACKEND` | `mock` | Local only: `mock`, `replay` (a recorded TRIBE v2 run), or `tribe` (needs a GPU). Modal always uses `tribe`. |
-| `NM_MIN_DURATION_S`, `NM_MAX_DURATION_S`, `NM_MAX_UPLOAD_MB` | `3`, `180`, `500` | Upload limits. |
+| `ADCORTEX_BRAIN_BACKEND` | `mock` | Local only: `mock`, `replay` (a recorded TRIBE v2 run), or `tribe` (needs a GPU). Modal always uses `tribe`. |
+| `ADCORTEX_MIN_DURATION_S`, `ADCORTEX_MAX_DURATION_S`, `ADCORTEX_MAX_UPLOAD_MB` | `3`, `180`, `500` | Upload limits. |
 
 Data leaves your deployment in two places. The report model's provider
-receives the metrics and, depending on `NM_LLM_MEDIA`, the clip or its
+receives the metrics and, depending on `ADCORTEX_LLM_MEDIA`, the clip or its
 keyframes; some providers' free tiers may use such data to improve their
 products. Scripts go to Google Translate's text-to-speech service, through
 gTTS, to be read aloud.
@@ -151,4 +151,4 @@ TRIBE v2's weights are licensed CC BY-NC 4.0: non-commercial use only. Llama
 3.2 has its own license, which your Hugging Face account accepts. The
 HCP-MMP1.0 atlas data are redistributed under the WU-Minn HCP Open Access Data
 Use Terms; the required acknowledgment is in
-[backend/src/neuromarketing/data/README.md](backend/src/neuromarketing/data/README.md).
+[backend/src/adcortex/data/README.md](backend/src/adcortex/data/README.md).

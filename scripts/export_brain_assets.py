@@ -4,7 +4,7 @@ TRIBE v2 predicts 20,484 cortical vertices on fsaverage5 (10,242 per
 hemisphere, left first). This script writes the two files that give those
 vertices anatomy:
 
-* backend/src/neuromarketing/data/atlas_fsaverage5.json
+* backend/src/adcortex/data/atlas_fsaverage5.json
     parcel list (180 HCP-MMP1.0 areas + medial wall) and a vertex -> parcel map
 * frontend/public/brain/atlas.json   (same content, for hover labels)
 * frontend/public/brain/mesh.json + mesh.bin
@@ -33,9 +33,9 @@ import numpy as np
 from nilearn import datasets
 
 ROOT = Path(__file__).resolve().parents[1]
-BACKEND_ATLAS = ROOT / "backend/src/neuromarketing/data/atlas_fsaverage5.json"
+BACKEND_ATLAS = ROOT / "backend/src/adcortex/data/atlas_fsaverage5.json"
 FRONTEND_DIR = ROOT / "frontend/public/brain"
-CACHE = ROOT / ".nm-data/cache/atlas"
+CACHE = ROOT / ".adcortex-data/cache/atlas"
 
 HEMI_SIZE = 10242
 # MD5 sums are the ones MNE pins for the figshare originals; the OpenNeuro
@@ -108,7 +108,9 @@ def download(urls: str | list[str], dest: Path, md5: str | None = None) -> Path:
     for url in candidates:
         if not dest.exists():
             dest.parent.mkdir(parents=True, exist_ok=True)
-            request = urllib.request.Request(url, headers={"User-Agent": "nm-assets"})
+            request = urllib.request.Request(
+                url, headers={"User-Agent": "adcortex-assets"}
+            )
             try:
                 with urllib.request.urlopen(request, timeout=60) as response:
                     dest.write_bytes(response.read())

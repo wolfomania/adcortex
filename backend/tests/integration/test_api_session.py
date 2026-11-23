@@ -7,12 +7,12 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from neuromarketing import __version__
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import build_context
-from neuromarketing.auth.service import SESSION_COOKIE
-from neuromarketing.config import Settings
-from neuromarketing.pipeline.services import create_services
+from adcortex import __version__
+from adcortex.api.app import create_app
+from adcortex.api.context import build_context
+from adcortex.auth.service import SESSION_COOKIE
+from adcortex.config import Settings
+from adcortex.pipeline.services import create_services
 from tests.integration.conftest import FakeDispatcher, seed
 
 PASSWORD = "open sesame"
@@ -128,7 +128,7 @@ def test_logging_out_clears_the_cookie(locked: TestClient) -> None:
     response = locked.post("/api/auth/logout")
 
     assert response.json()["data"] == {"authenticated": False}
-    assert 'nm_session=""' in response.headers["set-cookie"]
+    assert 'adcortex_session=""' in response.headers["set-cookie"]
     assert locked.get("/api/analyses").status_code == 401
 
 

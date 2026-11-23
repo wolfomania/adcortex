@@ -43,7 +43,7 @@ Thumbs.db
 .idea/
 
 # ── Local data (anchored to the repo root so source folders never match) ──
-/.nm-data/
+/.adcortex-data/
 /uploads/
 /results/
 /cache/

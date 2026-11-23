@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export const APP_TITLE = 'Neuro-Marketing Validator'
+export const APP_TITLE = 'AdCortex'
 
 /** Names the browser tab after the page, and restores the previous name on leaving. */
 export function useDocumentTitle(title: string | null | undefined): void {

@@ -8,12 +8,12 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import build_context
-from neuromarketing.api.frontend import resolve_static
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import ConfigurationError
-from neuromarketing.pipeline.services import create_services
+from adcortex.api.app import create_app
+from adcortex.api.context import build_context
+from adcortex.api.frontend import resolve_static
+from adcortex.config import Settings
+from adcortex.domain.errors import ConfigurationError
+from adcortex.pipeline.services import create_services
 from tests.integration.conftest import FakeDispatcher
 
 INDEX = b"<!doctype html><title>Neuro</title>"

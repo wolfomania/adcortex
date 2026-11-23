@@ -9,7 +9,7 @@ import json
 import sys
 from pathlib import Path
 
-from neuromarketing.api.schemas import api_json_schema
+from adcortex.api.schemas import api_json_schema
 
 
 def main() -> None:

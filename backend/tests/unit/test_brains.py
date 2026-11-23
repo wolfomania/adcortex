@@ -5,15 +5,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
-from neuromarketing.analysis.systems import load_systems
-from neuromarketing.brain.base import BrainPrediction, BrainRequest
-from neuromarketing.brain.factory import create_brain
-from neuromarketing.brain.mock import MockBrain
-from neuromarketing.brain.replay import ReplayBrain
-from neuromarketing.config import Settings
-from neuromarketing.domain.errors import NeuroError
-from neuromarketing.domain.models import Word
+from adcortex.analysis.atlas import N_VERTICES, load_atlas
+from adcortex.analysis.systems import load_systems
+from adcortex.brain.base import BrainPrediction, BrainRequest
+from adcortex.brain.factory import create_brain
+from adcortex.brain.mock import MockBrain
+from adcortex.brain.replay import ReplayBrain
+from adcortex.config import Settings
+from adcortex.domain.errors import NeuroError
+from adcortex.domain.models import Word
 
 
 def _system_curve(prediction: BrainPrediction, system_id: str) -> np.ndarray:

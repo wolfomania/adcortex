@@ -1,10 +1,10 @@
 """Record the replay brain's recording from a real TRIBE v2 run on Modal.
 
-`NM_BRAIN_BACKEND=replay` plays back one real TRIBE v2 prediction, so local
+`ADCORTEX_BRAIN_BACKEND=replay` plays back one real TRIBE v2 prediction, so local
 development shows real cortical patterns without a GPU. This script copies
 the prediction of a finished analysis from the deployment's Volume, keeps its
 first seconds, drops its transcript, and writes the file the replay brain
-loads (backend/src/neuromarketing/data/replay_v1.npz):
+loads (backend/src/adcortex/data/replay_v1.npz):
 
     uv run --project backend python scripts/record_replay_fixture.py <analysis ID>
 
@@ -21,10 +21,10 @@ from pathlib import Path
 
 import modal
 
-from neuromarketing.brain.base import BrainPrediction
-from neuromarketing.brain.replay import default_recording
-from neuromarketing.config import Settings
-from neuromarketing.domain.ids import require_analysis_id
+from adcortex.brain.base import BrainPrediction
+from adcortex.brain.replay import default_recording
+from adcortex.config import Settings
+from adcortex.domain.ids import require_analysis_id
 
 DEFAULT_SECONDS = 30
 

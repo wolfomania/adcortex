@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from neuromarketing.analysis.atlas import N_VERTICES, load_atlas
-from neuromarketing.analysis.systems import SystemCatalog, load_systems
+from adcortex.analysis.atlas import N_VERTICES, load_atlas
+from adcortex.analysis.systems import SystemCatalog, load_systems
 
 
 def test_atlas_covers_every_fsaverage5_vertex() -> None:

@@ -1,8 +1,8 @@
 # HTTP API
 
 The single-page app and the backend share this contract. Request and response
-models live in `backend/src/neuromarketing/api/schemas.py` and
-`backend/src/neuromarketing/domain/models.py`. The frontend generates its
+models live in `backend/src/adcortex/api/schemas.py` and
+`backend/src/adcortex/domain/models.py`. The frontend generates its
 TypeScript types from them:
 
 ```sh
@@ -29,7 +29,7 @@ cd backend && uv run python scripts/export_api_schema.py ../frontend/src/api/sch
 
 ## Authentication
 
-Authentication is optional. With `NM_PASSWORD` set, every route except
+Authentication is optional. With `ADCORTEX_PASSWORD` set, every route except
 `/api/health`, `/api/config`, `/api/auth/*`, and `/api/shared/*` requires the
 session cookie and otherwise returns `401 unauthorized`. The app then sends
 the person to `/login?next=<path>`.
@@ -37,7 +37,7 @@ the person to `/login?next=<path>`.
 | Method | Path | Body | Response `data` |
 |---|---|---|---|
 | GET | `/api/config` | | `AppConfig` |
-| POST | `/api/auth/login` | `LoginRequest` | `SessionInfo`; sets the `nm_session` cookie (HttpOnly, SameSite=Lax) |
+| POST | `/api/auth/login` | `LoginRequest` | `SessionInfo`; sets the `adcortex_session` cookie (HttpOnly, SameSite=Lax) |
 | POST | `/api/auth/logout` | | `SessionInfo`; clears the cookie |
 | GET | `/api/health` | | `Health` |
 

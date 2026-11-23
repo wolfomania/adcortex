@@ -3,7 +3,7 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "neuromarketing"
+name = "adcortex"
 version = "2.0.0"
 description = "Predict cortical responses to ads with Meta's TRIBE v2 and explain them with any LLM."
 requires-python = ">=3.12,<3.13"
@@ -35,7 +35,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/neuromarketing"]
+packages = ["src/adcortex"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -49,12 +49,12 @@ markers = [
 filterwarnings = ["error::pytest.PytestUnraisableExceptionWarning"]
 
 [tool.coverage.run]
-source = ["neuromarketing"]
+source = ["adcortex"]
 branch = true
 omit = [
     # Runs only inside the Modal GPU image (torch, tribev2); covered by the
     # Modal smoke test, not by unit tests.
-    "*/neuromarketing/brain/tribe.py",
+    "*/adcortex/brain/tribe.py",
 ]
 
 [tool.coverage.report]

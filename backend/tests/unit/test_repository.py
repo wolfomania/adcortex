@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from neuromarketing.domain.errors import NotFoundError
-from neuromarketing.domain.models import (
+from adcortex.domain.errors import NotFoundError
+from adcortex.domain.models import (
     AnalysisMeta,
     AnalysisResult,
     AnalysisState,
@@ -24,8 +24,8 @@ from neuromarketing.domain.models import (
     StoredComparison,
     StoredReport,
 )
-from neuromarketing.storage.local import LocalFsStore
-from neuromarketing.storage.repository import PREDICTION, AnalysisRepository
+from adcortex.storage.local import LocalFsStore
+from adcortex.storage.repository import PREDICTION, AnalysisRepository
 
 OLD = "20261120-090000-aaaaaa"
 MID = "20261121-090000-bbbbbb"

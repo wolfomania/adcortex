@@ -19,7 +19,7 @@ says "reused"), so time each run with a different file. Pass the URL that
     uv run --project backend python scripts/smoke_modal.py --url <URL> \\
         clips/spot-10s.mp4 clips/radio-30s.mp3 clips/script.txt
 
-When the app asks for a password, the script reads NM_PASSWORD from the
+When the app asks for a password, the script reads ADCORTEX_PASSWORD from the
 environment or from .env. It exits with 1 when any run fails a check.
 """
 
@@ -150,7 +150,7 @@ def login(client: httpx.Client, password: str | None) -> None:
     if not config["password_required"] or config["authenticated"]:
         return
     if not password:
-        raise SmokeError("The app asks for a password: set NM_PASSWORD.")
+        raise SmokeError("The app asks for a password: set ADCORTEX_PASSWORD.")
     _data(client.post("/api/auth/login", json={"password": password}))
 
 
@@ -205,8 +205,8 @@ def run(client: httpx.Client, path: Path, timeout_s: float) -> bool:
 
 
 def _password() -> str | None:
-    return os.environ.get("NM_PASSWORD") or dotenv_values(ROOT / ".env").get(
-        "NM_PASSWORD"
+    return os.environ.get("ADCORTEX_PASSWORD") or dotenv_values(ROOT / ".env").get(
+        "ADCORTEX_PASSWORD"
     )
 
 

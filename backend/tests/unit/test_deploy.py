@@ -11,8 +11,8 @@ from types import ModuleType
 import modal
 import pytest
 
-from neuromarketing.brain.remote import WORKER_CLASS
-from neuromarketing.jobs.base import ORCHESTRATOR_FUNCTION
+from adcortex.brain.remote import WORKER_CLASS
+from adcortex.jobs.base import ORCHESTRATOR_FUNCTION
 
 DEPLOY = Path(__file__).resolve().parents[3] / "deploy" / "modal_app.py"
 
@@ -21,8 +21,8 @@ DEPLOY = Path(__file__).resolve().parents[3] / "deploy" / "modal_app.py"
 def deploy() -> Iterator[ModuleType]:
     with pytest.MonkeyPatch.context() as patch:
         # Never read the developer's real .env (it holds keys).
-        patch.setenv("NM_DEPLOY_ENV_FILE", "/nonexistent/.env")
-        spec = importlib.util.spec_from_file_location("nm_deploy_app", DEPLOY)
+        patch.setenv("ADCORTEX_DEPLOY_ENV_FILE", "/nonexistent/.env")
+        spec = importlib.util.spec_from_file_location("adcortex_deploy_app", DEPLOY)
         assert spec is not None
         assert spec.loader is not None
         module = importlib.util.module_from_spec(spec)
@@ -44,15 +44,15 @@ def test_settings_the_deployment_decides_stay_local(
     env = tmp_path / ".env"
     env.write_text(
         "# local development\n"
-        "NM_LLM_MODEL=google:gemini-4-hydrogen\n"
+        "ADCORTEX_LLM_MODEL=google:gemini-4-hydrogen\n"
         "GOOGLE_API_KEY=test-key\n"
-        "NM_BRAIN_BACKEND=mock\n"
-        "NM_DATA_DIR=.nm-data\n"
-        "NM_PASSWORD=\n"
+        "ADCORTEX_BRAIN_BACKEND=mock\n"
+        "ADCORTEX_DATA_DIR=.adcortex-data\n"
+        "ADCORTEX_PASSWORD=\n"
     )
 
     assert deploy.secret_values(env) == {
-        "NM_LLM_MODEL": "google:gemini-4-hydrogen",
+        "ADCORTEX_LLM_MODEL": "google:gemini-4-hydrogen",
         "GOOGLE_API_KEY": "test-key",
     }
 
@@ -71,15 +71,15 @@ def test_the_gpu_image_gets_the_backend_dependencies(deploy: ModuleType) -> None
 def test_warns_when_anyone_could_use_the_deployment(
     deploy: ModuleType, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    deploy.warn_if_open({"NM_LLM_MODEL": "google:gemini-4-hydrogen"})
+    deploy.warn_if_open({"ADCORTEX_LLM_MODEL": "google:gemini-4-hydrogen"})
 
-    assert "NM_PASSWORD is not set" in capsys.readouterr().err
+    assert "ADCORTEX_PASSWORD is not set" in capsys.readouterr().err
 
 
 def test_stays_quiet_when_a_password_protects_the_deployment(
     deploy: ModuleType, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    deploy.warn_if_open({"NM_PASSWORD": "a long passphrase"})
+    deploy.warn_if_open({"ADCORTEX_PASSWORD": "a long passphrase"})
 
     assert capsys.readouterr().err == ""
 

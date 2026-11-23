@@ -9,8 +9,8 @@ from typing import Any
 import pytest
 from modal.types import InputStatus
 
-from neuromarketing.config import Settings
-from neuromarketing.domain.models import (
+from adcortex.config import Settings
+from adcortex.domain.models import (
     AnalysisMeta,
     AnalysisState,
     Job,
@@ -21,13 +21,13 @@ from neuromarketing.domain.models import (
     SourceFile,
     Status,
 )
-from neuromarketing.jobs.base import JobStatus
-from neuromarketing.jobs.factory import create_dispatcher
-from neuromarketing.jobs.local import LocalDispatcher
-from neuromarketing.jobs.modal_jobs import ModalDispatcher
-from neuromarketing.jobs.monitor import reconcile
-from neuromarketing.storage.local import LocalFsStore
-from neuromarketing.storage.repository import AnalysisRepository
+from adcortex.jobs.base import JobStatus
+from adcortex.jobs.factory import create_dispatcher
+from adcortex.jobs.local import LocalDispatcher
+from adcortex.jobs.modal_jobs import ModalDispatcher
+from adcortex.jobs.monitor import reconcile
+from adcortex.storage.local import LocalFsStore
+from adcortex.storage.repository import AnalysisRepository
 
 ID = "20261122-090000-cccccc"
 OTHER = "20261121-090000-bbbbbb"
@@ -145,7 +145,7 @@ def _modal(
         return known[call_id]
 
     dispatcher = ModalDispatcher(
-        "nm-app",
+        "adcortex-app",
         "orchestrate",
         lookup_function=lambda app, name: function,
         lookup_call=lookup_call,

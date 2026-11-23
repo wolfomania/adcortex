@@ -16,13 +16,13 @@ everything in one process, or on Modal, where each part scales to zero.
 flowchart LR
     browser["Browser<br/>React app"]
 
-    subgraph modal["Modal app: neuromarketing"]
+    subgraph modal["Modal app: adcortex"]
         web["web<br/>FastAPI: API + built app<br/>1 container, 64 requests at once"]
         orchestrate["orchestrate<br/>one job per call<br/>2 CPUs, up to 8 jobs at once"]
         worker["BrainWorker<br/>TRIBE v2 + WhisperX<br/>1 GPU (L4); jobs queue"]
-        data[("Volume nm-data<br/>analyses, media, keys")]
-        progress[("Dict nm-progress<br/>live progress")]
-        models[("Volume nm-models<br/>model weights")]
+        data[("Volume adcortex-data<br/>analyses, media, keys")]
+        progress[("Dict adcortex-progress<br/>live progress")]
+        models[("Volume adcortex-models<br/>model weights")]
     end
 
     llm["LLM provider<br/>Gemini, Claude, OpenAI, ..."]
@@ -39,10 +39,10 @@ flowchart LR
     worker --> models
 ```
 
-Locally (`NM_RUNTIME=local`), the same parts are function calls in one
-process: jobs run in-process, storage is a folder (`.nm-data/`), progress is
+Locally (`ADCORTEX_RUNTIME=local`), the same parts are function calls in one
+process: jobs run in-process, storage is a folder (`.adcortex-data/`), progress is
 kept in memory, and the brain backend is a mock, a replay of a recorded run,
-or the real model on a local GPU (`NM_BRAIN_BACKEND`).
+or the real model on a local GPU (`ADCORTEX_BRAIN_BACKEND`).
 
 ## An analysis, step by step
 
@@ -116,15 +116,15 @@ clip before gzip.
 
 ## Security
 
-- **Password (optional).** With `NM_PASSWORD` set, every API route except
+- **Password (optional).** With `ADCORTEX_PASSWORD` set, every API route except
   health, config, login, and share links needs a session cookie
-  (`nm_session`, `api/middleware.py`): HttpOnly, HMAC-signed, and valid for
-  `NM_SESSION_DAYS` (30 by default). Its signature covers a digest of the
+  (`adcortex_session`, `api/middleware.py`): HttpOnly, HMAC-signed, and valid for
+  `ADCORTEX_SESSION_DAYS` (30 by default). Its signature covers a digest of the
   password, so changing the password signs everyone out. Login attempts are
   limited to 5 per minute per client address.
 - **Share links** carry a signed token with an expiry (30 days). They grant
   read-only access to one analysis.
-- **Signing key.** `NM_SECRET_KEY`, or a random key generated once and kept in
+- **Signing key.** `ADCORTEX_SECRET_KEY`, or a random key generated once and kept in
   storage (`keys/signing.key`).
 - **Headers.** Every response carries `X-Content-Type-Options: nosniff`,
   `Referrer-Policy: no-referrer` (share tokens live in URLs), and

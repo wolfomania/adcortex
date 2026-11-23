@@ -9,13 +9,13 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import AppContext
-from neuromarketing.api.errors import UNEXPECTED, describe_validation
-from neuromarketing.api.schemas import api_json_schema
-from neuromarketing.domain.models import Job, Progress, Status, utcnow
-from neuromarketing.storage.local import MemoryProgressStore
-from neuromarketing.storage.repository import AnalysisRepository
+from adcortex.api.app import create_app
+from adcortex.api.context import AppContext
+from adcortex.api.errors import UNEXPECTED, describe_validation
+from adcortex.api.schemas import api_json_schema
+from adcortex.domain.models import Job, Progress, Status, utcnow
+from adcortex.storage.local import MemoryProgressStore
+from adcortex.storage.repository import AnalysisRepository
 from tests.integration.conftest import FakeDispatcher, seed
 
 

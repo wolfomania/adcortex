@@ -340,7 +340,7 @@ export function createMockDb(options: MockDbOptions) {
     if (!scenario.llm) {
       throw new MockError(
         'unavailable',
-        'No report model is configured. Set NM_LLM_MODEL to write reports.',
+        'No report model is configured. Set ADCORTEX_LLM_MODEL to write reports.',
       )
     }
     requireCompleted(record, 'The report can be rewritten once the analysis is complete.')

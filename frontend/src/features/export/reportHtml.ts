@@ -68,7 +68,7 @@ function header({ analysis, result, exportedAt }: ReportHtmlInput): string {
   return `<header>
 <p class="note">${e(KIND_LABELS[meta.kind])} · ${e(formatDuration(result.duration_s))} · ${e(formatDateTime(meta.created_at))}</p>
 <h1>${e(meta.name)}</h1>
-<p class="note">Exported from Neuro-Marketing Validator on ${e(formatDateTime(exportedAt))}.</p>
+<p class="note">Exported from AdCortex on ${e(formatDateTime(exportedAt))}.</p>
 </header>`
 }
 
@@ -310,7 +310,7 @@ export function renderReportHtml(input: ReportHtmlInput): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'">
-<title>${e(analysis.meta.name)} · Neuro-Marketing Validator</title>
+<title>${e(analysis.meta.name)} · AdCortex</title>
 <style>${STYLES}</style>
 </head>
 <body>

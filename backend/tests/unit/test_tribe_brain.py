@@ -9,8 +9,8 @@ from typing import Any, cast
 import numpy as np
 import pytest
 
-from neuromarketing.brain.base import BrainRequest
-from neuromarketing.brain.tribe import TribeBrain
+from adcortex.brain.base import BrainRequest
+from adcortex.brain.tribe import TribeBrain
 
 
 class FakeTribe:

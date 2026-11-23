@@ -6,10 +6,10 @@ from datetime import timedelta
 import pytest
 from fastapi.testclient import TestClient
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.compare import STALE_AFTER
-from neuromarketing.api.context import AppContext
-from neuromarketing.domain.models import (
+from adcortex.api.app import create_app
+from adcortex.api.compare import STALE_AFTER
+from adcortex.api.context import AppContext
+from adcortex.domain.models import (
     ComparisonReport,
     Job,
     Progress,
@@ -17,8 +17,8 @@ from neuromarketing.domain.models import (
     StoredComparison,
     utcnow,
 )
-from neuromarketing.pipeline.runner import compare_key
-from neuromarketing.storage.repository import AnalysisRepository
+from adcortex.pipeline.runner import compare_key
+from adcortex.storage.repository import AnalysisRepository
 from tests.integration.conftest import START, FakeDispatcher, seed, with_llm
 from tests.llm_fakes import comparison_args
 

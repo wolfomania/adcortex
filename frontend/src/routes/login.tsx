@@ -1,4 +1,4 @@
-// The password gate, shown only when the deployment sets NM_PASSWORD.
+// The password gate, shown only when the deployment sets ADCORTEX_PASSWORD.
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { useId, useState } from 'react'
@@ -67,7 +67,7 @@ function LoginPage() {
       >
         <div className="flex flex-col items-center gap-3 text-center">
           <LogoMark className="size-10" />
-          <h1 className="text-xl font-semibold tracking-tight">Neuro-Marketing Validator</h1>
+          <h1 className="text-xl font-semibold tracking-tight">AdCortex</h1>
           <p className="text-sm text-muted-foreground">Enter the password to continue.</p>
         </div>
         <div className="flex flex-col gap-2">

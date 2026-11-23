@@ -11,9 +11,9 @@ from types import ModuleType
 import numpy as np
 import pytest
 
-from neuromarketing.brain.base import BrainPrediction, BrainRequest
-from neuromarketing.brain.replay import ReplayBrain
-from neuromarketing.domain.models import Word
+from adcortex.brain.base import BrainPrediction, BrainRequest
+from adcortex.brain.replay import ReplayBrain
+from adcortex.domain.models import Word
 
 SCRIPT = Path(__file__).resolve().parents[3] / "scripts" / "record_replay_fixture.py"
 ID = "20261123-121600-3ad554"
@@ -22,7 +22,7 @@ ID = "20261123-121600-3ad554"
 @pytest.fixture(scope="module")
 def record() -> Iterator[ModuleType]:
     with pytest.MonkeyPatch.context() as patch:
-        spec = importlib.util.spec_from_file_location("nm_record_replay", SCRIPT)
+        spec = importlib.util.spec_from_file_location("adcortex_record_replay", SCRIPT)
         assert spec is not None
         assert spec.loader is not None
         module = importlib.util.module_from_spec(spec)

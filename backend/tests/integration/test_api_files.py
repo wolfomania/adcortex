@@ -5,8 +5,8 @@ import gzip
 import pytest
 from fastapi.testclient import TestClient
 
-from neuromarketing.domain.models import MediaKind, Status, utcnow
-from neuromarketing.storage.repository import AnalysisRepository
+from adcortex.domain.models import MediaKind, Status, utcnow
+from adcortex.storage.repository import AnalysisRepository
 from tests.integration.conftest import FRAMES_BYTES, VIDEO_BYTES, seed
 
 IMMUTABLE = "private, max-age=31536000, immutable"

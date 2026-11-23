@@ -12,12 +12,12 @@ from fastapi.testclient import TestClient
 from pydantic_ai.messages import ModelMessage, ModelResponse, ToolCallPart
 from pydantic_ai.models.function import AgentInfo, FunctionModel
 
-from neuromarketing.api.app import create_app
-from neuromarketing.api.context import AppContext, build_context
-from neuromarketing.config import Settings
-from neuromarketing.jobs.local import LocalDispatcher
-from neuromarketing.llm.client import LlmConfig
-from neuromarketing.pipeline.services import create_services
+from adcortex.api.app import create_app
+from adcortex.api.context import AppContext, build_context
+from adcortex.config import Settings
+from adcortex.jobs.local import LocalDispatcher
+from adcortex.llm.client import LlmConfig
+from adcortex.pipeline.services import create_services
 from tests.llm_fakes import comparison_args, report_args
 
 pytestmark = pytest.mark.ffmpeg

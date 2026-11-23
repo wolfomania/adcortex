@@ -348,7 +348,7 @@ const CHORDS_RADIO = [
 
 function main() {
   mkdirSync(OUT, { recursive: true })
-  const work = mkdtempSync(join(tmpdir(), 'nm-mock-media-'))
+  const work = mkdtempSync(join(tmpdir(), 'adcortex-mock-media-'))
   const timeline = {}
   try {
     // 30 s launch spot.

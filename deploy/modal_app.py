@@ -3,15 +3,15 @@
     modal run deploy/modal_app.py::prefetch_models   # once: models into a Volume
     modal deploy deploy/modal_app.py
 
-Three parts share the Volume of analyses (`nm-data`) and the Dict of progress
-(`nm-progress`), which the backend creates on first use:
+Three parts share the Volume of analyses (`adcortex-data`) and the Dict of progress
+(`adcortex-progress`), which the backend creates on first use:
 
 - `web`: the API and the built app on one CPU container that serves many
   requests at once and restores from a memory snapshot on a cold start.
 - `orchestrate`: one CPU container per analysis, report, or comparison. It
   calls the GPU only to predict.
 - `BrainWorker`: TRIBE v2 on one GPU. Its models load from the Volume
-  `nm-models` when the container starts, and it shuts down after 10 idle
+  `adcortex-models` when the container starts, and it shuts down after 10 idle
   minutes.
 
 Settings and provider keys come from the local `.env` and travel as a Modal
@@ -37,9 +37,9 @@ import modal
 ROOT = Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "backend"
 FRONTEND = ROOT / "frontend"
-ENV_FILE = Path(os.environ.get("NM_DEPLOY_ENV_FILE", ROOT / ".env"))
+ENV_FILE = Path(os.environ.get("ADCORTEX_DEPLOY_ENV_FILE", ROOT / ".env"))
 
-APP_NAME = "neuromarketing"  # Settings.modal_app
+APP_NAME = "adcortex"  # Settings.modal_app
 MINUTES = 60
 
 
@@ -49,12 +49,12 @@ def gpu_choice(value: str) -> str | list[str]:
     return types[0] if len(types) == 1 else types
 
 
-# `NM_GPU=L40S make deploy` picks another GPU; see docs/deploy.md for costs.
-# With a list, `NM_GPU=L40S,A100-80GB`, Modal takes the first type it has
+# `ADCORTEX_GPU=L40S make deploy` picks another GPU; see docs/deploy.md for costs.
+# With a list, `ADCORTEX_GPU=L40S,A100-80GB`, Modal takes the first type it has
 # capacity for, so a job never waits on one sold-out type.
-GPU = gpu_choice(os.environ.get("NM_GPU", "L4"))
+GPU = gpu_choice(os.environ.get("ADCORTEX_GPU", "L4"))
 # Restores the GPU worker from a GPU memory snapshot (alpha on Modal).
-GPU_SNAPSHOT = os.environ.get("NM_GPU_SNAPSHOT") == "1"
+GPU_SNAPSHOT = os.environ.get("ADCORTEX_GPU_SNAPSHOT") == "1"
 # TRIBE caches each job's features on the GPU worker's disk. Past this size,
 # or half the disk that was free at start, the worker stops after its current
 # job, and the next job starts a fresh container.
@@ -83,23 +83,23 @@ GATED_MODEL = (
     "in .env to a token of that account."
 )
 OPEN_DEPLOYMENT = (
-    "Warning: NM_PASSWORD is not set, so anyone who finds the app's URL can "
+    "Warning: ADCORTEX_PASSWORD is not set, so anyone who finds the app's URL can "
     "run analyses on your GPU and read or delete every analysis. Set "
-    "NM_PASSWORD in .env and deploy again to require a login.\n"
+    "ADCORTEX_PASSWORD in .env and deploy again to require a login.\n"
 )
 
 # Settings the deployment decides: values from a local `.env` would point at
 # backends or paths that don't exist on Modal.
 DEPLOYMENT_KEYS = frozenset(
     {
-        "NM_RUNTIME",
-        "NM_DATA_DIR",
-        "NM_FRONTEND_DIST",
-        "NM_BRAIN_BACKEND",
-        "NM_REPLAY_FIXTURE",
-        "NM_MODELS_DIR",
-        "NM_WHISPERX_PYTHON",
-        "NM_CORS_ORIGINS",
+        "ADCORTEX_RUNTIME",
+        "ADCORTEX_DATA_DIR",
+        "ADCORTEX_FRONTEND_DIST",
+        "ADCORTEX_BRAIN_BACKEND",
+        "ADCORTEX_REPLAY_FIXTURE",
+        "ADCORTEX_MODELS_DIR",
+        "ADCORTEX_WHISPERX_PYTHON",
+        "ADCORTEX_CORS_ORIGINS",
     }
 )
 log = logging.getLogger("deploy")
@@ -138,7 +138,7 @@ def recycle_if_full(used: int, limit: int, stop: Callable[[], object]) -> None:
 
 def warn_if_open(values: Mapping[str, str | None]) -> None:
     """Say so when the deployment will let in anyone who has its URL."""
-    if not values.get("NM_PASSWORD"):
+    if not values.get("ADCORTEX_PASSWORD"):
         sys.stderr.write(OPEN_DEPLOYMENT)
 
 
@@ -154,7 +154,7 @@ def with_backend(image: modal.Image) -> modal.Image:
     """Mounts the backend package (data files included) at start-up, so code
     changes don't rebuild the image."""
     return image.add_local_python_source(
-        "neuromarketing", ignore=["**/__pycache__", "**/*.pyc"]
+        "adcortex", ignore=["**/__pycache__", "**/*.pyc"]
     )
 
 
@@ -163,7 +163,9 @@ deploy_values = secret_values(ENV_FILE) if modal.is_local() else {}
 if modal.is_local():
     warn_if_open(deploy_values)
 env_secret = modal.Secret.from_dict(deploy_values)
-models_volume = modal.Volume.from_name("nm-models", create_if_missing=True, version=2)
+models_volume = modal.Volume.from_name(
+    "adcortex-models", create_if_missing=True, version=2
+)
 
 # ── CPU image: API, pipeline, and the app built with pnpm ───────────────────
 
@@ -187,9 +189,9 @@ web_image = with_backend(
     .run_commands("cd /build && pnpm build && mkdir -p /app && mv dist /app/dist")
     .env(
         {
-            "NM_RUNTIME": "modal",
-            "NM_BRAIN_BACKEND": "tribe",
-            "NM_FRONTEND_DIST": "/app/dist",
+            "ADCORTEX_RUNTIME": "modal",
+            "ADCORTEX_BRAIN_BACKEND": "tribe",
+            "ADCORTEX_FRONTEND_DIST": "/app/dist",
         }
     )
 )
@@ -225,10 +227,10 @@ gpu_image = with_backend(
     .run_commands("chmod 755 /opt/whisperx/bin/python-gpu")
     .env(
         {
-            "NM_RUNTIME": "modal",
-            "NM_BRAIN_BACKEND": "tribe",
-            "NM_MODELS_DIR": str(MODELS),
-            "NM_WHISPERX_PYTHON": "/opt/whisperx/bin/python-gpu",
+            "ADCORTEX_RUNTIME": "modal",
+            "ADCORTEX_BRAIN_BACKEND": "tribe",
+            "ADCORTEX_MODELS_DIR": str(MODELS),
+            "ADCORTEX_WHISPERX_PYTHON": "/opt/whisperx/bin/python-gpu",
             "HF_HOME": str(MODELS / "hf"),
             "TORCH_HOME": str(MODELS / "torch"),
             "NLTK_DATA": "/opt/nltk_data",
@@ -240,11 +242,11 @@ gpu_image = with_backend(
 # Imported at module level, so the memory snapshots of `web` and `orchestrate`
 # hold them. Elsewhere, failures here are ignored.
 with web_image.imports():  # type: ignore[no-untyped-call]
-    from neuromarketing.api.app import create_app
-    from neuromarketing.config import get_settings
-    from neuromarketing.domain.models import Job
-    from neuromarketing.pipeline.runner import make_runner
-    from neuromarketing.pipeline.services import create_services
+    from adcortex.api.app import create_app
+    from adcortex.config import get_settings
+    from adcortex.domain.models import Job
+    from adcortex.pipeline.runner import make_runner
+    from adcortex.pipeline.services import create_services
 
 
 @app.function(
@@ -295,17 +297,19 @@ def orchestrate(payload: dict[str, Any]) -> None:
 class BrainWorker:
     @modal.enter(snap=GPU_SNAPSHOT)
     def load(self) -> None:
-        from neuromarketing.brain.factory import create_brain
-        from neuromarketing.brain.tribe import TribeBrain
-        from neuromarketing.config import get_settings
-        from neuromarketing.storage.factory import create_storage
+        from adcortex.brain.factory import create_brain
+        from adcortex.brain.tribe import TribeBrain
+        from adcortex.config import get_settings
+        from adcortex.storage.factory import create_storage
 
         configure_logging()
         config = get_settings()
         self.storage = create_storage(config)
         brain = create_brain(config)
         if not isinstance(brain, TribeBrain):
-            raise RuntimeError("The GPU worker runs TRIBE v2 (NM_BRAIN_BACKEND=tribe).")
+            raise RuntimeError(
+                "The GPU worker runs TRIBE v2 (ADCORTEX_BRAIN_BACKEND=tribe)."
+            )
         brain.warmup()
         self.brain = brain
         self.cache_limit = cache_limit(shutil.disk_usage(tempfile.gettempdir()).free)
@@ -314,7 +318,7 @@ class BrainWorker:
     def predict(self, payload: dict[str, Any]) -> bytes:
         import modal.experimental
 
-        from neuromarketing.pipeline.worker import run_brain_job
+        from adcortex.pipeline.worker import run_brain_job
 
         storage = self.storage
         try:
@@ -342,7 +346,7 @@ class BrainWorker:
     timeout=60 * MINUTES,
 )
 def prefetch_models(force: bool = False) -> None:
-    """Download every model the GPU worker loads into the Volume `nm-models`."""
+    """Download every model the GPU worker loads into the Volume `adcortex-models`."""
     configure_logging("%(message)s")
     if PREFETCHED.exists() and not force:
         log.info("Models are in place (%s). Pass --force to refresh.", PREFETCHED)
@@ -353,8 +357,8 @@ def prefetch_models(force: bool = False) -> None:
     from huggingface_hub import snapshot_download
     from huggingface_hub.errors import GatedRepoError
 
-    from neuromarketing.brain import whisperx_runner
-    from neuromarketing.config import get_settings
+    from adcortex.brain import whisperx_runner
+    from adcortex.config import get_settings
 
     for repo in MODEL_REPOS:
         log.info("Downloading %s", repo)

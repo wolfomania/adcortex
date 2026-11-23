@@ -20,14 +20,14 @@ Node.js is not needed locally: the image builds the app with pnpm.
 ## Deploy
 
 ```sh
-cp .env.example .env   # set HF_TOKEN, NM_LLM_MODEL and its key, NM_PASSWORD
+cp .env.example .env   # set HF_TOKEN, ADCORTEX_LLM_MODEL and its key, ADCORTEX_PASSWORD
 make deploy
 ```
 
 `make deploy` runs two steps:
 
 1. `prefetch_models` downloads about 20 GB of models into the Volume
-   `nm-models`: TRIBE v2, V-JEPA 2, Wav2Vec-BERT 2.0, Llama 3.2 3B, DINOv2,
+   `adcortex-models`: TRIBE v2, V-JEPA 2, Wav2Vec-BERT 2.0, Llama 3.2 3B, DINOv2,
    Whisper large-v3, and the English alignment model. It runs once; later
    deploys skip it. `uv run --project backend modal run
    deploy/modal_app.py::prefetch_models --force` downloads again.
@@ -37,8 +37,8 @@ The first build is the slow one, mostly for PyTorch in the two Python
 environments of the GPU image. Later deploys reuse the cached layers; backend
 code is mounted at start-up and never triggers a rebuild.
 
-Set `NM_PASSWORD`. The app's URL is public and easy to guess, since Modal
-builds it from your workspace name and `neuromarketing-web`. Without a
+Set `ADCORTEX_PASSWORD`. The app's URL is public and easy to guess, since Modal
+builds it from your workspace name and `adcortex-web`. Without a
 password, anyone who finds it can run analyses on your GPU and read or delete
 every analysis. `make deploy` prints a warning when the password is missing.
 Share links keep working for people without the password.
@@ -56,27 +56,27 @@ while you pick a file. Jobs wait in line for the single GPU container.
 
 Data lives in Modal storage that the backend creates on first use:
 
-- Volume `nm-data`: uploads, results, reports, and the signing key.
-- Dict `nm-progress`: live progress of running jobs.
+- Volume `adcortex-data`: uploads, results, reports, and the signing key.
+- Dict `adcortex-progress`: live progress of running jobs.
 
 ## Settings
 
 `make deploy` sends the entries of `.env` to Modal as a Secret, except the
-settings the deployment decides itself: `NM_RUNTIME`, `NM_BRAIN_BACKEND`,
-`NM_DATA_DIR`, `NM_FRONTEND_DIST`, `NM_MODELS_DIR`, `NM_WHISPERX_PYTHON`,
-`NM_REPLAY_FIXTURE`, and `NM_CORS_ORIGINS`. Deploy again after editing `.env`.
+settings the deployment decides itself: `ADCORTEX_RUNTIME`, `ADCORTEX_BRAIN_BACKEND`,
+`ADCORTEX_DATA_DIR`, `ADCORTEX_FRONTEND_DIST`, `ADCORTEX_MODELS_DIR`, `ADCORTEX_WHISPERX_PYTHON`,
+`ADCORTEX_REPLAY_FIXTURE`, and `ADCORTEX_CORS_ORIGINS`. Deploy again after editing `.env`.
 
 Choose the GPU when deploying:
 
 ```sh
-NM_GPU=L40S make deploy
+ADCORTEX_GPU=L40S make deploy
 ```
 
 A comma-separated list sets fallbacks in order of preference, so a job never
-waits on one sold-out GPU type: `NM_GPU=L40S,A100-80GB make deploy`. Modal
+waits on one sold-out GPU type: `ADCORTEX_GPU=L40S,A100-80GB make deploy`. Modal
 takes the first type it has capacity for.
 
-`NM_GPU_SNAPSHOT=1` restores the GPU worker from a GPU memory snapshot. Modal
+`ADCORTEX_GPU_SNAPSHOT=1` restores the GPU worker from a GPU memory snapshot. Modal
 marks GPU snapshots as alpha.
 
 ## Costs
@@ -94,7 +94,7 @@ make stop   # stop the app; the Volumes and their data stay
 ```
 
 `make deploy` starts it again. To remove the data as well, delete the Volumes
-`nm-data` and `nm-models` and the Dict `nm-progress` in the Modal dashboard.
+`adcortex-data` and `adcortex-models` and the Dict `adcortex-progress` in the Modal dashboard.
 
 ## Licenses
 
