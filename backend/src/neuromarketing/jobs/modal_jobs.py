@@ -26,7 +26,13 @@ _FAILED = frozenset(
 
 class CallInput(Protocol):
     @property
+    def function_call_id(self) -> str: ...
+
+    @property
     def status(self) -> InputStatus: ...
+
+    @property
+    def children(self) -> Sequence[CallInput]: ...
 
 
 class Call(Protocol):
@@ -75,12 +81,14 @@ class ModalDispatcher:
                 "Can't read the status of Modal call %s", ref.call_id, exc_info=True
             )
             return "unknown"
-        if not graph:
+        # The graph starts at its root: the web request that spawned the job,
+        # which finished long before the job did. Read the job's own input.
+        job = _find_input(graph, ref.call_id)
+        if job is None:
             return "unknown"
-        status = graph[0].status
-        if status == InputStatus.SUCCESS:
+        if job.status == InputStatus.SUCCESS:
             return "finished"
-        return "failed" if status in _FAILED else "running"
+        return "failed" if job.status in _FAILED else "running"
 
     def cancel(self, ref: JobRef) -> None:
         if not ref.call_id:
@@ -89,6 +97,16 @@ class ModalDispatcher:
             self._lookup_call(ref.call_id).cancel()
         except Exception:
             logger.warning("Can't cancel Modal call %s", ref.call_id, exc_info=True)
+
+
+def _find_input(inputs: Sequence[CallInput], call_id: str) -> CallInput | None:
+    for item in inputs:
+        if item.function_call_id == call_id:
+            return item
+        found = _find_input(item.children, call_id)
+        if found is not None:
+            return found
+    return None
 
 
 def _function_from_name(app_name: str, name: str) -> Function:

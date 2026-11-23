@@ -109,9 +109,16 @@ class FakeCall:
     object_id: str
     status: InputStatus = InputStatus.PENDING
     cancelled: bool = False
+    graph: list[FakeInput] | None = None
 
     def get_call_graph(self) -> list[FakeInput]:
-        return [FakeInput(self.object_id, self.status)]
+        if self.graph is not None:
+            return self.graph
+        # Modal returns the graph from its root: the web request that spawned
+        # the job, which finished long before the job did.
+        gpu = FakeInput("fc-gpu", InputStatus.PENDING)
+        job = FakeInput(self.object_id, self.status, [gpu])
+        return [FakeInput("fc-web", InputStatus.SUCCESS, [job])]
 
     def cancel(self, terminate_containers: bool = False) -> None:
         self.cancelled = True
@@ -174,6 +181,13 @@ def test_modal_job_status_follows_the_call_graph(
     dispatcher, _ = _modal({"fc-1": FakeCall("fc-1", status)})
 
     assert dispatcher.status(JobRef(backend="modal", call_id="fc-1")) == expected
+
+
+def test_modal_job_status_is_unknown_when_the_graph_lacks_the_job() -> None:
+    web = FakeInput("fc-web", InputStatus.SUCCESS)
+    dispatcher, _ = _modal({"fc-1": FakeCall("fc-1", graph=[web])})
+
+    assert dispatcher.status(JobRef(backend="modal", call_id="fc-1")) == "unknown"
 
 
 def test_modal_job_status_is_unknown_when_the_call_cannot_be_found() -> None:
